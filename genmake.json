@@ -1,0 +1,45 @@
+{
+	"variables":
+	{
+		"gcc-x64":
+		{
+			"LIBS": "/home/denis/libs",
+			"REPS": "/home/denis/reps"
+		}
+	},
+
+	"entries":
+	{
+		"type": "static",
+
+		"name": "xgk-renderers",
+
+		"include_directories":
+		[
+			"$(SRC)/glad/include",
+			"$(REPS)/denis-belov"
+		],
+
+		"flags_additional": "$(STD_20) $(NO_LINK) $(VERBOSE) $(OPT_FASTX) $(SSE) $(FLAGS_ADD) -fPIC",
+
+		"watch_files":
+		[
+			{
+				"file": "$(SRC)/opengl/opengl.cpp",
+				"watch_files": "$(SRC)/opengl/opengl.h"
+			},
+
+			{
+				"file": "$(SRC)/vulkan/vulkan.cpp",
+				"watch_files": "$(SRC)/vulkan/vulkan.h"
+			},
+
+			{
+				"file": "$(SRC)/glad/src/glad.c",
+				"flags_additional": "-w"
+			},
+
+			"$(SRC)/glfw/glfw-3.3.5/build/src/libglfw3.$(LIB_EXT)"
+		]
+	}
+}
