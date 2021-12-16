@@ -2091,24 +2091,24 @@ namespace XGK
 
 			const char* dev_exts [] { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-			dev.getProps(physical_device, surf);
+			device.getProps(physical_device, surf);
 
 			static const float queue_priorities { 1.0f };
 
-			std::vector<VkDeviceQueueCreateInfo> queue_ci { DevQueueCI(dev.graphics_queue_family_index, 1, &queue_priorities) };
+			std::vector<VkDeviceQueueCreateInfo> queue_ci { DevQueueCI(device.graphics_queue_family_index, 1, &queue_priorities) };
 
-			if (dev.graphics_queue_family_index != dev.present_queue_family_index)
+			if (device.graphics_queue_family_index != device.present_queue_family_index)
 			{
-				queue_ci.push_back(DevQueueCI(dev.present_queue_family_index, 1, &queue_priorities));
+				queue_ci.push_back(DevQueueCI(device.present_queue_family_index, 1, &queue_priorities));
 			}
 
-			// cout << "G " << dev.graphics_queue_family_index << endl;
-			// cout << "P " <<  dev.present_queue_family_index << endl;
+			// cout << "G " << device.graphics_queue_family_index << endl;
+			// cout << "P " <<  device.present_queue_family_index << endl;
 
-			dev.create(physical_device, dev.graphics_queue_family_index != dev.present_queue_family_index ? 2 : 1, queue_ci.data(), 0, nullptr, 1, dev_exts);
+			device.create(physical_device, device.graphics_queue_family_index != device.present_queue_family_index ? 2 : 1, queue_ci.data(), 0, nullptr, 1, dev_exts);
 
-			graphics_queue = dev.Queue(dev.graphics_queue_family_index, 0);
-			present_queue = dev.Queue(dev.present_queue_family_index, 0);
+			graphics_queue = device.Queue(device.graphics_queue_family_index, 0);
+			present_queue = device.Queue(device.present_queue_family_index, 0);
 
 
 
@@ -2171,7 +2171,7 @@ namespace XGK
 			};
 
 			render_pass =
-				dev.RenderPass
+				device.RenderPass
 				(
 					// 3, render_pass_attach,
 					2, render_pass_attach,
@@ -2181,9 +2181,9 @@ namespace XGK
 
 
 
-			const uint32_t qfi [] { dev.graphics_queue_family_index, dev.present_queue_family_index };
+			const uint32_t qfi [] { device.graphics_queue_family_index, device.present_queue_family_index };
 
-			swapchain = dev.SwapchainKHR
+			swapchain = device.SwapchainKHR
 			(
 				surf,
 				8,
@@ -2204,7 +2204,7 @@ namespace XGK
 				VK_TRUE
 			);
 
-			std::vector<VkImage> swapchain_images { dev.getSwapchainImages(swapchain) };
+			std::vector<VkImage> swapchain_images { device.getSwapchainImages(swapchain) };
 
 			swapchain_image_count = swapchain_images.size();
 
@@ -2227,7 +2227,7 @@ namespace XGK
 
 			for (uint64_t i = 0; i < swapchain_image_count; ++i)
 			{
-				swapchain_image_views[i] = dev.ImageView
+				swapchain_image_views[i] = device.ImageView
 				(
 					swapchain_images[i],
 					VK_IMAGE_VIEW_TYPE_2D,
@@ -2238,7 +2238,7 @@ namespace XGK
 					0, 1
 				);
 
-				render_images[i] = dev.Image
+				render_images[i] = device.Image
 				(
 					VK_IMAGE_TYPE_2D,
 					VK_FORMAT_B8G8R8A8_UNORM,
@@ -2255,16 +2255,16 @@ namespace XGK
 
 				if (!i)
 				{
-					render_image_mem_reqs = dev.MemReqs(render_images[i]);
+					render_image_mem_reqs = device.MemReqs(render_images[i]);
 
-					render_image_dev_local_mem_index = dev.getMemTypeIndex(&render_image_mem_reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+					render_image_dev_local_mem_index = device.getMemTypeIndex(&render_image_mem_reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 				}
 
-				render_image_mems[i] = dev.Mem(render_image_mem_reqs.size, render_image_dev_local_mem_index);
+				render_image_mems[i] = device.Mem(render_image_mem_reqs.size, render_image_dev_local_mem_index);
 
-				dev.bindMem(render_images[i], render_image_mems[i]);
+				device.bindMem(render_images[i], render_image_mems[i]);
 
-				render_image_views[i] = dev.ImageView
+				render_image_views[i] = device.ImageView
 				(
 					render_images[i],
 					VK_IMAGE_VIEW_TYPE_2D,
@@ -2277,7 +2277,7 @@ namespace XGK
 
 
 
-				depth_images[i] = dev.Image
+				depth_images[i] = device.Image
 				(
 					VK_IMAGE_TYPE_2D,
 					VK_FORMAT_D32_SFLOAT,
@@ -2294,16 +2294,16 @@ namespace XGK
 
 				if (!i)
 				{
-					depth_image_mem_reqs = dev.MemReqs(depth_images[i]);
+					depth_image_mem_reqs = device.MemReqs(depth_images[i]);
 
-					depth_image_dev_local_mem_index = dev.getMemTypeIndex(&depth_image_mem_reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+					depth_image_dev_local_mem_index = device.getMemTypeIndex(&depth_image_mem_reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 				}
 
-				depth_image_mems[i] = dev.Mem(depth_image_mem_reqs.size, depth_image_dev_local_mem_index);
+				depth_image_mems[i] = device.Mem(depth_image_mem_reqs.size, depth_image_dev_local_mem_index);
 
-				dev.bindMem(depth_images[i], depth_image_mems[i]);
+				device.bindMem(depth_images[i], depth_image_mems[i]);
 
-				depth_image_views[i] = dev.ImageView
+				depth_image_views[i] = device.ImageView
 				(
 					depth_images[i],
 					VK_IMAGE_VIEW_TYPE_2D,
@@ -2320,7 +2320,7 @@ namespace XGK
 				// VkImageView framebuffer_attach[] = { render_image_views[i], depth_image_views[i], swapchain_image_views[i] };
 				VkImageView framebuffer_attach [] { swapchain_image_views[i], depth_image_views[i] };
 
-				framebuffers[i] = dev.Framebuffer
+				framebuffers[i] = device.Framebuffer
 				(
 					render_pass,
 					// 3, framebuffer_attach,
@@ -2329,7 +2329,7 @@ namespace XGK
 					1
 				);
 
-				submission_completed_fences[i] = dev.Fence(VK_FENCE_CREATE_SIGNALED_BIT);
+				submission_completed_fences[i] = device.Fence(VK_FENCE_CREATE_SIGNALED_BIT);
 
 				VkSemaphoreTypeCreateInfo semaphore_type_ci
 				{
@@ -2339,17 +2339,17 @@ namespace XGK
 					0
 				};
 
-				submission_completed_semaphores[i] = dev.Semaphore(0, &semaphore_type_ci);
-				image_available_semaphores[i] = dev.Semaphore(0, &semaphore_type_ci);
+				submission_completed_semaphores[i] = device.Semaphore(0, &semaphore_type_ci);
+				image_available_semaphores[i] = device.Semaphore(0, &semaphore_type_ci);
 			}
 
 
 
 			// command buffers
 
-			VkCommandPool cmd_pool { dev.CmdPool(dev.graphics_queue_family_index, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT) };
+			VkCommandPool cmd_pool { device.CmdPool(device.graphics_queue_family_index, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT) };
 
-			cmd_buffers = dev.CmdBuffer(cmd_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, swapchain_image_count);
+			cmd_buffers = device.CmdBuffer(cmd_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, swapchain_image_count);
 
 
 
@@ -2394,9 +2394,9 @@ namespace XGK
 
 		void Renderer::destroy (void)
 		{
-			vkDeviceWaitIdle(dev.handle);
+			vkDeviceWaitIdle(device.handle);
 
-			dev.destroy();
+			device.destroy();
 
 			inst.destroy();
 
@@ -2545,149 +2545,155 @@ namespace XGK
 
 
 
-		// Material* Material::used_instance {};
+		Material* Material::used_instance {};
 
-		// Material::Material (RendererBase* _renderer, API::Material* _wrapper)
-		// {
-		// 	renderer = _renderer;
-		// 	wrapper = _wrapper;
+		const VkPrimitiveTopology Material::TOPOLOGY [3]
+		{
+			VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+			VK_PRIMITIVE_TOPOLOGY_POINT_LIST,
+			VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
+		};
 
-
-
-		// 	program = glCreateProgram();
-
-
-
-		// 	const GLchar* _glsl4_code_vertex { wrapper->glsl4_code_vertex.c_str() };
-
-		// 	GLuint shader_vertex = glCreateShader(GL_VERTEX_SHADER);
-		// 	glShaderSource(shader_vertex, 1, &_glsl4_code_vertex, nullptr);
-		// 	glCompileShader(shader_vertex);
-
-		// 	{
-		// 		GLint isCompiled = 0;
-		// 		glGetShaderiv(shader_vertex, GL_COMPILE_STATUS, &isCompiled);
-		// 		if(isCompiled == GL_FALSE)
-		// 		{
-		// 			GLint maxLength = 0;
-		// 			glGetShaderiv(shader_vertex, GL_INFO_LOG_LENGTH, &maxLength);
-
-		// 			// The maxLength includes the NULL character
-		// 			std::vector<GLchar> errorLog(maxLength);
-		// 			glGetShaderInfoLog(shader_vertex, maxLength, &maxLength, &errorLog[0]);
-
-		// 			for (GLchar err : errorLog)
-		// 			{
-		// 				cout << err;
-		// 			}
-
-		// 			cout << endl;
-
-		// 			// // Provide the infolog in whatever manor you deem best.
-		// 			// // Exit with failure.
-		// 			// glDeleteShader(shader_vertex); // Don't leak the shader.
-		// 			// return;
-		// 		}
-		// 	}
-
-		// 	glAttachShader(program, shader_vertex);
+		Material::Material (RendererBase* _renderer, API::Material* _wrapper)
+		{
+			renderer = _renderer;
+			wrapper = _wrapper;
 
 
 
-		// 	const GLchar* _glsl4_code_fragment { wrapper->glsl4_code_fragment.c_str() };
-
-		// 	GLuint shader_fragment = glCreateShader(GL_FRAGMENT_SHADER);
-		// 	glShaderSource(shader_fragment, 1, &_glsl4_code_fragment, nullptr);
-		// 	glCompileShader(shader_fragment);
-
-		// 	{
-		// 		GLint isCompiled = 0;
-		// 		glGetShaderiv(shader_fragment, GL_COMPILE_STATUS, &isCompiled);
-		// 		if(isCompiled == GL_FALSE)
-		// 		{
-		// 			GLint maxLength = 0;
-		// 			glGetShaderiv(shader_fragment, GL_INFO_LOG_LENGTH, &maxLength);
-
-		// 			// The maxLength includes the NULL character
-		// 			std::vector<GLchar> errorLog(maxLength);
-		// 			glGetShaderInfoLog(shader_fragment, maxLength, &maxLength, &errorLog[0]);
-
-		// 			for (GLchar err : errorLog)
-		// 			{
-		// 				cout << err;
-		// 			}
-
-		// 			cout << endl;
-
-		// 			// // Provide the infolog in whatever manor you deem best.
-		// 			// // Exit with failure.
-		// 			// glDeleteShader(shader_fragment); // Don't leak the shader.
-		// 			// return;
-		// 		}
-		// 	}
-
-		// 	glAttachShader(program, shader_fragment);
+			topology = Material::TOPOLOGY[static_cast<size_t>(wrapper->topology)];
 
 
 
-		// 	glLinkProgram(program);
+			VkPipelineInputAssemblyStateCreateInfo default_ppl_input_asm { PplInputAsm(topology, VK_FALSE) };
+
+			VkPipelineTessellationStateCreateInfo default_ppl_tess { PplTess(0, 0) };
+
+			// flip vulkan viewport
+			VkViewport viewport { 0.0f, 0.0f, static_cast<float>(renderer->wrapper->width), static_cast<float>(renderer->wrapper->height), 0.0f, 1.0f };
+			// VkViewport viewport = { 0.0f, 600.0f, 800.0f, -600.0f, 0.0f, 1.0f };
+			VkRect2D scissor { { 0, 0 }, { renderer->wrapper->width, renderer->wrapper->height } };
+
+			VkPipelineViewportStateCreateInfo default_ppl_view { PplView(1, &viewport, 1, &scissor) };
+
+			VkPipelineMultisampleStateCreateInfo default_ppl_sample { PplSample(VK_SAMPLE_COUNT_1_BIT, VK_FALSE, 0.0f, nullptr, VK_FALSE, VK_FALSE) };
+			// VkPipelineMultisampleStateCreateInfo default_ppl_sample { PplSample(VK_SAMPLE_COUNT_1_BIT, VK_FALSE, 0.0f, nullptr, VK_FALSE, VK_FALSE) };
+
+			VkPipelineRasterizationStateCreateInfo default_ppl_rast { PplRast(VK_FALSE, VK_FALSE, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, VK_FALSE, 0.0f, 0.0f, 0.0f, 1.0f) };
+
+			VkStencilOpState default_ppl_stenc { VK_STENCIL_OP_KEEP, VK_STENCIL_OP_KEEP, VK_STENCIL_OP_KEEP, VK_COMPARE_OP_ALWAYS, 0, 0, 0 };
+
+			VkStencilOpState front
+			{
+				.failOp = VK_STENCIL_OP_KEEP,
+				.passOp = VK_STENCIL_OP_KEEP,
+				.compareOp = VK_COMPARE_OP_ALWAYS,
+			};
+
+			VkStencilOpState back
+			{
+				.failOp = VK_STENCIL_OP_KEEP,
+				.passOp = VK_STENCIL_OP_KEEP,
+				.compareOp = VK_COMPARE_OP_ALWAYS,
+			};
+
+			VkPipelineDepthStencilStateCreateInfo default_ppl_depth_stenc { PplDepthStenc(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS_OR_EQUAL, VK_FALSE, VK_FALSE, default_ppl_stenc, default_ppl_stenc, 0.0f, 1.0f) };
+
+			// VkPipelineDepthStencilStateCreateInfo default_ppl_depth_stenc { PplDepthStenc(VK_FALSE, VK_FALSE, VK_COMPARE_OP_LESS, VK_FALSE, VK_FALSE, { 0 }, { 0 }, 0.0f, 1.0f) };
+
+			VkPipelineColorBlendAttachmentState blend_attach
+			{
+				VK_FALSE,
+				VK_BLEND_FACTOR_ZERO, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+				VK_BLEND_FACTOR_ZERO, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD,
+				VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
+			};
+
+			VkPipelineColorBlendStateCreateInfo default_ppl_blend
+			{
+				PplBlend
+				(
+					VK_FALSE,
+					VK_LOGIC_OP_CLEAR,
+					1, &blend_attach,
+					0.0f, 0.0f, 0.0f, 0.0f
+				)
+			};
+
+			VkPipelineDynamicStateCreateInfo default_ppl_dyn { PplDyn(0, nullptr) };
 
 
 
-		// 	for (API::Uniform* uniform_wrapper : wrapper->uniforms)
-		// 	{
-		// 		Uniform* uniform { new Uniform { renderer, uniform_wrapper } };
+			VkPipelineShaderStageCreateInfo ppl_stages []
+			{
+				PplShader(VK_SHADER_STAGE_VERTEX_BIT, renderer->device.Shader(sizeof(wrapper->spirv_code_vertex), wrapper->spirv_code_vertex)),
+				PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, renderer->device.Shader(sizeof(wrapper->spirv_code_fragment), wrapper->spirv_code_fragment))
+			};
 
-		// 		uniform->location = glGetUniformLocation(program, (const GLchar*) uniform_wrapper->name.c_str());
+			VkVertexInputBindingDescription vertex_binding { 0, 12, VK_VERTEX_INPUT_RATE_VERTEX };
+			VkVertexInputAttributeDescription vertex_attr { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 };
 
-		// 		if (uniform->location > -1)
-		// 		{
-		// 			uniform->update = Uniform::uniformMatrix4fv;
+			VkPipelineVertexInputStateCreateInfo ppl_vertex { PplVertex(1, &vertex_binding, 1, &vertex_attr) };
 
-		// 			uniforms.push_back(uniform);
-		// 		}
-		// 	}
+			VkPipelineLayout ppl_layout = renderer->device.PplLayout(1, &descr_set_layout);
 
-
-
-		// 	for (API::UniformBlock* uniform_block_wrapper : wrapper->uniform_blocks)
-		// 	{
-		// 		UniformBlock* uniform_block { new UniformBlock { renderer, uniform_block_wrapper } };
-
-		// 		glUniformBlockBinding
-		// 		(
-		// 			program,
-		// 			glGetUniformBlockIndex(program, (const GLchar*) uniform_block_wrapper->name.c_str()),
-		// 			uniform_block_wrapper->binding
-		// 		);
-
-		// 		uniform_blocks.push_back(uniform_block);
-		// 	}
+			ppl =
+				renderer->device.PplG
+				(
+					2, ppl_stages,
+					&ppl_vertex,
+					&default_ppl_input_asm,
+					&default_ppl_tess,
+					&default_ppl_view,
+					&default_ppl_rast,
+					&default_ppl_sample,
+					&default_ppl_depth_stenc,
+					&default_ppl_blend,
+					&default_ppl_dyn,
+					ppl_layout,
+					renderer->render_pass, 0
+				);
 
 
 
-		// 	// Initially update uniforms.
-		// 	use();
-		// }
+			// for (API::UniformBlock* uniform_block_wrapper : wrapper->uniform_blocks)
+			// {
+			// 	UniformBlock* uniform_block { new UniformBlock { renderer, uniform_block_wrapper } };
 
-		// void Material::use (void)
-		// {
-		// 	Material::used_instance = this;
+			// 	glUniformBlockBinding
+			// 	(
+			// 		program,
+			// 		glGetUniformBlockIndex(program, (const GLchar*) uniform_block_wrapper->name.c_str()),
+			// 		uniform_block_wrapper->binding
+			// 	);
 
-		// 	glUseProgram(program);
+			// 	uniform_blocks.push_back(uniform_block);
+			// }
 
-		// 	// for (size_t i {}; i < uniforms.size(); ++i)
-		// 	// {
-		// 	// 	Uniform* uniform = uniforms[i];
 
-		// 	// 	uniform->update(uniform);
-		// 	// }
 
-		// 	for (Uniform* uniform : uniforms)
-		// 	{
-		// 		uniform->update(uniform);
-		// 	}
-		// }
+			// Initially update uniforms.
+			use();
+		}
+
+		void Material::use (void)
+		{
+			// Material::used_instance = this;
+
+			// glUseProgram(program);
+
+			// // for (size_t i {}; i < uniforms.size(); ++i)
+			// // {
+			// // 	Uniform* uniform = uniforms[i];
+
+			// // 	uniform->update(uniform);
+			// // }
+
+			// for (Uniform* uniform : uniforms)
+			// {
+			// 	uniform->update(uniform);
+			// }
+		}
 
 
 

@@ -2111,21 +2111,9 @@ namespace XGK
 
 
 
-			virtual void endLoop (void) = 0;
-			virtual void destroy (void) = 0;
-		};
-
-
-
-		struct Renderer : public RendererBase
-		{
-			Renderer (API::Renderer*);
-
-
-
 			Instance inst {};
 			VkSurfaceKHR surf { VK_NULL_HANDLE };
-			Device dev {};
+			Device device {};
 			VkQueue graphics_queue { VK_NULL_HANDLE };
 			VkQueue present_queue { VK_NULL_HANDLE };
 
@@ -2151,6 +2139,18 @@ namespace XGK
 			// VkPipeline ppl2 { VK_NULL_HANDLE };
 			// VkBuffer vertex_buffer { VK_NULL_HANDLE };
 			uint32_t curr_image {};
+
+
+
+			virtual void endLoop (void) = 0;
+			virtual void destroy (void) = 0;
+		};
+
+
+
+		struct Renderer : public RendererBase
+		{
+			Renderer (API::Renderer*);
 
 
 
@@ -2231,58 +2231,73 @@ namespace XGK
 
 
 
-		// struct Material
-		// {
-		// 	static Material* used_instance;
+		struct Material
+		{
+			static Material* used_instance;
+
+			// VK_PRIMITIVE_TOPOLOGY_POINT_LIST = 0,
+			// VK_PRIMITIVE_TOPOLOGY_LINE_LIST = 1,
+			// VK_PRIMITIVE_TOPOLOGY_LINE_STRIP = 2,
+			// VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST = 3,
+			// VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP = 4,
+			// VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN = 5,
+			// VK_PRIMITIVE_TOPOLOGY_LINE_LIST_WITH_ADJACENCY = 6,
+			// VK_PRIMITIVE_TOPOLOGY_LINE_STRIP_WITH_ADJACENCY = 7,
+			// VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST_WITH_ADJACENCY = 8,
+			// VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP_WITH_ADJACENCY = 9,
+			// VK_PRIMITIVE_TOPOLOGY_PATCH_LIST = 10,
+			static const VkPrimitiveTopology TOPOLOGY [3];
 
 
 
-		// 	RendererBase* renderer {};
-		// 	API::Material* wrapper {};
+			RendererBase* renderer {};
+			API::Material* wrapper {};
 
-		// 	GLenum topology {};
+			VkPrimitiveTopology topology {};
 
-		// 	GLuint program {};
+			VkGraphicsPipeline ppl {};
 
-		// 	std::vector<Uniform*> uniforms {};
-		// 	std::vector<UniformBlock*> uniform_blocks {};
+			// GLuint program {};
 
-
-
-		// 	Material (RendererBase*, API::Material*);
+			// std::vector<Uniform*> uniforms {};
+			// std::vector<UniformBlock*> uniform_blocks {};
 
 
 
-		// 	void use (void);
-		// };
+			Material (RendererBase*, API::Material*);
 
 
 
-		// struct Object
-		// {
-		// 	RendererBase* renderer {};
-		// 	API::Object* wrapper {};
+			void use (void);
+		};
 
 
 
-		// 	Object (RendererBase*, API::Object*);
+		struct Object
+		{
+			RendererBase* renderer {};
+			API::Object* wrapper {};
 
 
 
-		// 	void draw (void) const;
-		// };
+			Object (RendererBase*, API::Object*);
 
 
 
-		// struct Scene
-		// {
-		// 	RendererBase* renderer {};
-		// 	API::Scene* wrapper {};
+			void draw (void) const;
+		};
 
 
 
-		// 	Scene (RendererBase*, API::Scene*);
-		// };
+		struct Scene
+		{
+			RendererBase* renderer {};
+			API::Scene* wrapper {};
+
+
+
+			Scene (RendererBase*, API::Scene*);
+		};
 	}
 }
 

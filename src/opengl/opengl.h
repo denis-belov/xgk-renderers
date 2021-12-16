@@ -126,6 +126,8 @@ namespace XGK
 		{
 			static Material* used_instance;
 
+			static const GLenum TOPOLOGY [3];
+
 
 
 			RendererBase* renderer {};

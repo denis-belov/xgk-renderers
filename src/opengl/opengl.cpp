@@ -202,10 +202,22 @@ namespace XGK
 
 		Material* Material::used_instance {};
 
+		const GLenum Material::TOPOLOGY [3]
+		{
+			GL_TRIANGLES,
+			GL_POINTS,
+			GL_LINES,
+		};
+
 		Material::Material (RendererBase* _renderer, API::Material* _wrapper)
 		{
 			renderer = _renderer;
 			wrapper = _wrapper;
+
+
+
+			// Why is not wrapper->topology an integer?
+			topology = Material::TOPOLOGY[static_cast<size_t>(wrapper->topology)];
 
 
 
@@ -356,8 +368,7 @@ namespace XGK
 		{
 			glDrawArrays
 			(
-				// Material::used_instance->topology,
-				GL_TRIANGLES,
+				Material::used_instance->topology,
 				wrapper->scene_vertex_data_offset,
 				wrapper->scene_vertex_data_length
 			);
