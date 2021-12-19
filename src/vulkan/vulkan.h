@@ -2183,51 +2183,80 @@ namespace XGK
 
 
 
-		// struct Uniform
-		// {
-		// 	// uniform_update_t functions
-		// 	static void uniformMatrix4fv (Uniform*);
+		struct Uniform
+		{
+			// uniform_update_t functions
+			// static void uniformMatrix4fv (Uniform*);
 
 
 
-		// 	RendererBase* renderer {};
-		// 	API::Uniform* wrapper {};
+			RendererBase* renderer {};
+			API::Uniform* wrapper {};
 
-		// 	GLint location {};
+			// GLint location {};
 
-		// 	GLint locaiton {};
+			// GLint locaiton {};
 
-		// 	using uniform_update_t = void (*) (Uniform*);
+			using uniform_update_t = void (*) (Uniform*);
 
-		// 	uniform_update_t update {};
-
-
-
-		// 	// Isn't Renderer* parameter needed?
-		// 	Uniform (RendererBase*, API::Uniform*);
-		// };
+			uniform_update_t update {};
 
 
 
-		// struct UniformBlock
-		// {
-		// 	RendererBase* renderer {};
-		// 	API::UniformBlock* wrapper {};
-
-		// 	GLuint buffer {};
-
-		// 	size_t buffer_length {};
-
-		// 	std::vector<Uniform*> uniforms {};
+			// Isn't Renderer* parameter needed?
+			Uniform (RendererBase*, API::Uniform*);
+		};
 
 
 
-		// 	UniformBlock (RendererBase*, API::UniformBlock*);
+		struct UniformBlock
+		{
+			RendererBase* renderer {};
+			API::UniformBlock* wrapper {};
+
+			VkBuffer buffer {};
+
+			size_t buffer_length {};
+
+			std::vector<Uniform*> uniforms {};
+
+			VkDescriptorBufferInfo descr_bi { VK_NULL_HANDLE, 0, VK_WHOLE_SIZE };
+
+			VkWriteDescriptorSet entry =
+				WriteDescrSet
+				(
+					VK_NULL_HANDLE, 0, 0,
+					1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+					nullptr,
+					&descr_bi,
+					nullptr
+				);
+
+			VkDescriptorSetLayoutBinding entry_layout
+			{
+				.binding = 1,
+				.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+				.descriptorCount = 1,
+				.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+				.pImmutableSamplers = nullptr,
+			};
 
 
 
-		// 	void use (void);
-		// };
+			UniformBlock (RendererBase*, API::UniformBlock*);
+
+
+
+			void use (void);
+		};
+
+
+
+		struct DecsriptorSet
+		{
+			RendererBase* renderer {};
+			API::Material* wrapper {};
+		};
 
 
 
@@ -2255,7 +2284,7 @@ namespace XGK
 
 			VkPrimitiveTopology topology {};
 
-			VkGraphicsPipeline ppl {};
+			VkPipeline ppl {};
 
 			// GLuint program {};
 

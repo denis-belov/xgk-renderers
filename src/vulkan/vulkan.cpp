@@ -834,8 +834,8 @@ namespace XGK
 
 			VkPipelineShaderStageCreateInfo ppl_stages []
 			{
-				PplShader(VK_SHADER_STAGE_VERTEX_BIT, renderer->device.Shader(sizeof(wrapper->spirv_code_vertex), wrapper->spirv_code_vertex)),
-				PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, renderer->device.Shader(sizeof(wrapper->spirv_code_fragment), wrapper->spirv_code_fragment))
+				PplShader(VK_SHADER_STAGE_VERTEX_BIT, renderer->device.Shader(sizeof(wrapper->spirv_code_vertex), wrapper->spirv_code_vertex.data())),
+				PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, renderer->device.Shader(sizeof(wrapper->spirv_code_fragment), wrapper->spirv_code_fragment.data()))
 			};
 
 			VkVertexInputBindingDescription vertex_binding { 0, 12, VK_VERTEX_INPUT_RATE_VERTEX };
