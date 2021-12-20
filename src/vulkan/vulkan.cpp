@@ -1,12 +1,14 @@
+#include <cstring>
+
 #include "xgk-renderers/src/vulkan/vulkan.h"
 
 // using namespace XGK::VULKAN::WRAPPERS;
 
 
 
-// #include <iostream>
-// using std::cout;
-// using std::endl;
+#include <iostream>
+using std::cout;
+using std::endl;
 
 
 
@@ -111,6 +113,7 @@ DECL_PROC(vkCmdPushConstants);
 DECL_PROC(vkCmdSetScissor);
 DECL_PROC(vkCmdDrawIndexed);
 DECL_PROC(vkCmdCopyBufferToImage);
+DECL_PROC(vkCmdUpdateBuffer);
 DECL_PROC(vkEndCommandBuffer);
 DECL_PROC(vkResetCommandBuffer);
 
@@ -253,29 +256,29 @@ namespace XGK
 			curr_image = 0;
 
 			const char* inst_exts []
-			#ifdef DEBUG
-				#if defined(__linux__)
-					{ "VK_KHR_surface", "VK_KHR_xlib_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
-				#elif defined(_WIN64)
-					{ "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
-				#endif
-			#else
+			// #ifdef DEBUG
+			// 	#if defined(__linux__)
+			// 		{ "VK_KHR_surface", "VK_KHR_xlib_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
+			// 	#elif defined(_WIN64)
+			// 		{ "VK_KHR_surface", "VK_KHR_win32_surface", VK_EXT_DEBUG_REPORT_EXTENSION_NAME };
+			// 	#endif
+			// #else
 				#if defined(__linux__)
 					{ "VK_KHR_surface", "VK_KHR_xlib_surface" };
 				#elif defined(_WIN64)
 					{ "VK_KHR_surface", "VK_KHR_win32_surface" };
 				#endif
-			#endif
+			// #endif
 
 			VkApplicationInfo app_i { AppI() };
 
-			#ifdef DEBUG
-				const char* inst_layers [] { "VK_LAYER_KHRONOS_validation" };
+			// #ifdef DEBUG
+			// 	const char* inst_layers [] { "VK_LAYER_KHRONOS_validation" };
 
-				inst.create(&app_i, 1, inst_layers, 3, inst_exts);
-			#else
+			// 	inst.create(&app_i, 1, inst_layers, 3, inst_exts);
+			// #else
 				inst.create(&app_i, 0, nullptr, 2, inst_exts);
-			#endif
+			// #endif
 
 			// cout << inst.physical_devices << endl;
 
@@ -400,10 +403,10 @@ namespace XGK
 				800, 600,
 				1,
 				VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-				// VK_SHARING_MODE_EXCLUSIVE,
-				// 0, nullptr,
-				VK_SHARING_MODE_CONCURRENT,
-				2, qfi,
+				VK_SHARING_MODE_EXCLUSIVE,
+				0, nullptr,
+				// VK_SHARING_MODE_CONCURRENT,
+				// 2, qfi,
 				VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
 				VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
 				VK_PRESENT_MODE_IMMEDIATE_KHR,
@@ -525,7 +528,6 @@ namespace XGK
 
 
 				// VkImageView framebuffer_attach[] = { render_image_views[i], depth_image_views[i], swapchain_image_views[i] };
-				// VkImageView framebuffer_attach[] = { render_image_views[i], depth_image_views[i], swapchain_image_views[i] };
 				VkImageView framebuffer_attach [] { swapchain_image_views[i], depth_image_views[i] };
 
 				framebuffers[i] = device.Framebuffer
@@ -597,7 +599,6 @@ namespace XGK
 
 		void Renderer::endLoop (void)
 		{
-			// glfwSwapBuffers(window);
 		}
 
 		void Renderer::destroy (void)
@@ -615,141 +616,153 @@ namespace XGK
 
 
 
-		// RendererOffscreen::RendererOffscreen (API::Renderer* _wrapper) : RendererBase(_wrapper)
-		// {
-		// 	glfwHideWindow(window);
-
-		// 	glfwSwapInterval(1);
-
-
-
-		// 	// Framebuffer object for offscreen rendering
-		// 	{
-		// 		glCreateFramebuffers(1, &framebuffer);
-		// 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
-		// 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		// 		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-
-		// 		glCreateRenderbuffers(1, &framebuffer_renderbuffer_color);
-		// 		glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_renderbuffer_color);
-		// 		glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, wrapper->width, wrapper->height);
-		// 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
-		// 		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, framebuffer_renderbuffer_color);
-
-		// 		// Depth attachment
-		// 		// TODO: make depth buffer optional.
-		// 		{
-		// 			glEnable(GL_DEPTH_TEST);
-		// 			glDepthFunc(GL_LEQUAL);
-
-		// 			glCreateRenderbuffers(1, &framebuffer_renderbuffer_depth);
-		// 			glBindRenderbuffer(GL_RENDERBUFFER, framebuffer_renderbuffer_depth);
-		// 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, wrapper->width, wrapper->height);
-		// 			glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-		// 			glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, framebuffer_renderbuffer_depth);
-		// 		}
-
-		// 		// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		// 	}
+		Uniform::Uniform (RendererBase* _renderer, API::Uniform* _wrapper)
+		{
+			renderer = _renderer;
+			wrapper = _wrapper;
+		}
 
 
 
-		// 	// Pixel pack buffer
-		// 	{
-		// 		glCreateBuffers(1, &pixel_pack_buffer);
-
-		// 		glBindBuffer(GL_PIXEL_PACK_BUFFER, pixel_pack_buffer);
-		// 		// TODO: cache wrapper->width * wrapper->height * 4
-		// 		glBufferData(GL_PIXEL_PACK_BUFFER, wrapper->width * wrapper->height * 4, nullptr, GL_DYNAMIC_READ);
-
-		// 		// Redundant call. GL_COLOR_ATTACHMENT0 is a default framebuffer read buffer.
-		// 		glReadBuffer(GL_COLOR_ATTACHMENT0);
-		// 		glReadPixels(0, 0, wrapper->width, wrapper->height, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-		// 		pixel_data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-		// 	}
-		// }
-
-		// void RendererOffscreen::endLoop (void)
-		// {
-		// 	// glBindBuffer(GL_PIXEL_PACK_BUFFER, pixel_pack_buffer);
-		// 	glBufferData(GL_PIXEL_PACK_BUFFER, wrapper->width * wrapper->height * 4, nullptr, GL_DYNAMIC_READ);
-		// 	// glReadBuffer(GL_COLOR_ATTACHMENT0);
-		// 	glReadPixels(0, 0, wrapper->width, wrapper->height, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-
-		// 	pixel_data = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-
-		// 	// if (pixel_data)
-		// 	// {
-		// 	// 	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-		// 	// }
-
-		// 	// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		// 	// glDrawBuffer(GL_BACK);
-		// 	// glReadBuffer(GL_FRONT);
-		// }
+		UniformBlock::UniformBlock (RendererBase* _renderer, API::UniformBlock* _wrapper)
+		{
+			// cout << "UB 111" << endl;
+			renderer = _renderer;
+			wrapper = _wrapper;
 
 
 
-		// void Uniform::uniformMatrix4fv (Uniform* uniform)
-		// {
-		// 	glUniformMatrix4fv(uniform->location, 1, false, (float*) uniform->wrapper->object_addr);
-		// }
+			// entry =
+			// 	WriteDescrSet
+			// 	(
+			// 		VK_NULL_HANDLE, wrapper->binding, 0,
+			// 		1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+			// 		nullptr,
+			// 		&descr_bi,
+			// 		nullptr
+			// 	);
 
-		// Uniform::Uniform (RendererBase* _renderer, API::Uniform* _wrapper)
-		// {
-		// 	renderer = _renderer;
-		// 	wrapper = _wrapper;
-		// }
-
-
-
-		// UniformBlock::UniformBlock (RendererBase* _renderer, API::UniformBlock* _wrapper)
-		// {
-		// 	renderer = _renderer;
-		// 	wrapper = _wrapper;
+			layout.binding = wrapper->binding;
 
 
 
-		// 	for (API::Uniform* uniform_wrapper : wrapper->uniforms)
-		// 	{
-		// 		Uniform* uniform { new Uniform { renderer, uniform_wrapper } };
+			for (API::Uniform* uniform_wrapper : wrapper->uniforms)
+			{
+				Uniform* uniform { new Uniform { renderer, uniform_wrapper } };
 
-		// 		buffer_length += uniform_wrapper->size;
+				uniforms.push_back(uniform);
 
-		// 		uniforms.push_back(uniform);
-		// 	}
-
-
-
-		// 	glGenBuffers(1, &buffer);
-		// 	glBindBuffer(GL_UNIFORM_BUFFER, buffer);
-		// 	glBindBufferBase(GL_UNIFORM_BUFFER, wrapper->binding, buffer);
-		// 	glBufferData(GL_UNIFORM_BUFFER, buffer_length, nullptr, GL_DYNAMIC_DRAW);
+				buffer_length += uniform->wrapper->size;
+			}
 
 
 
-		// 	// Initially update uniforms.
-		// 	use();
-		// }
+			buffer = renderer->device.Buffer(buffer_length, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_SHARING_MODE_EXCLUSIVE);
 
-		// void UniformBlock::use (void)
-		// {
-		// 	glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+			cout << "UB 222" << endl;
 
-		// 	// for (size_t i {}; i < uniforms.size(); ++i)
-		// 	// {
-		// 	// 	Uniform* uniform = uniforms[i];
+			VkMemoryRequirements vk_uniform_buffer_mem_reqs { renderer->device.MemReqs(buffer) };
 
-		// 	// 	glBufferSubData(GL_UNIFORM_BUFFER, uniform->wrapper->block_index, uniform->wrapper->size, uniform->wrapper->object_addr);
-		// 	// }
+			uint64_t vk_uniform_buffer_mem_index { renderer->device.getMemTypeIndex(&vk_uniform_buffer_mem_reqs, VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
 
-		// 	for (Uniform* uniform : uniforms)
-		// 	{
-		// 		glBufferSubData(GL_UNIFORM_BUFFER, uniform->wrapper->block_index, uniform->wrapper->size, uniform->wrapper->object_addr);
-		// 	}
-		// }
+			VkDeviceMemory vk_uniform_buffer_mem { renderer->device.Mem(vk_uniform_buffer_mem_reqs.size, vk_uniform_buffer_mem_index) };
+
+			renderer->device.bindMem(buffer, vk_uniform_buffer_mem);
+
+			mapped_memory_addr = renderer->device.mapMem(vk_uniform_buffer_mem, 0, buffer_length, 0);
+
+
+
+			descr_bi.buffer = buffer;
+
+
+
+			// for (API::Uniform* uniform_wrapper : wrapper->uniforms)
+			// {
+			// 	Uniform* uniform { new Uniform { renderer, uniform_wrapper } };
+
+			// 	uniforms.push_back(uniform);
+			// }
+
+
+
+			use();
+		}
+
+		void UniformBlock::use (void)
+		{
+			for (Uniform* uniform : uniforms)
+			{
+				/**
+				 * This is suitable only for small amounts fo data for unmapped buffers
+				 * and not for initial buffer updates.
+				 */
+				// vkCmdUpdateBuffer(renderer->cmd_buffers[renderer->curr_image], buffer, 0, uniform->wrapper->size, uniform->wrapper->object_addr);
+
+				memcpy(mapped_memory_addr, uniform->wrapper->object_addr, uniform->wrapper->size);
+			}
+		}
+
+
+
+		DescriptorSet::DescriptorSet (RendererBase* _renderer, API::DescriptorSet* _wrapper)
+		{
+			renderer = _renderer;
+			wrapper = _wrapper;
+
+
+
+			std::vector<VkDescriptorSetLayoutBinding> descr_set_layout_bindings {};
+			std::vector<VkWriteDescriptorSet> write_descr_sets {};
+
+			cout << "DS 111" << endl;
+
+			for (API::UniformBlock* binding_wrapper : wrapper->bindings)
+			{
+				cout << "DS 222" << endl;
+				UniformBlock* binding { new UniformBlock { renderer, binding_wrapper } };
+				cout << "DS 333" << endl;
+
+				bindings.push_back(binding);
+
+				descr_set_layout_bindings.push_back(binding->layout);
+			}
+
+			layout = renderer->device.DescrSetLayout(1, descr_set_layout_bindings.data());
+
+			handle = renderer->device.DescrSet(renderer->descriptor_pool, 1, &layout).data()[0];
+
+			for (UniformBlock* binding : bindings)
+			{
+				cout << "binding: " <<  binding->wrapper->binding << endl;
+				VkWriteDescriptorSet write_descr_set =
+					WriteDescrSet
+					(
+						handle, binding->wrapper->binding, 0,
+						1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+						nullptr,
+						&binding->descr_bi,
+						nullptr
+					);
+
+				// write_descr_set.dstSet = handle;
+
+				write_descr_sets.push_back(write_descr_set);
+			}
+
+
+
+			renderer->device.updateDescrSets(write_descr_sets.size(), write_descr_sets.data(), 0, nullptr);
+
+
+
+			// use();
+		}
+
+		void DescriptorSet::use (Material* material)
+		{
+			vkCmdBindDescriptorSets(renderer->cmd_buffers[renderer->curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, material->ppl_layout, 0, 1, &handle, 0, nullptr);
+		}
 
 
 
@@ -771,6 +784,8 @@ namespace XGK
 
 			topology = Material::TOPOLOGY[static_cast<size_t>(wrapper->topology)];
 
+			cout << "MMM 111" << endl;
+
 
 
 			VkPipelineInputAssemblyStateCreateInfo default_ppl_input_asm { PplInputAsm(topology, VK_FALSE) };
@@ -779,13 +794,12 @@ namespace XGK
 
 			// flip vulkan viewport
 			VkViewport viewport { 0.0f, 0.0f, static_cast<float>(renderer->wrapper->width), static_cast<float>(renderer->wrapper->height), 0.0f, 1.0f };
-			// VkViewport viewport = { 0.0f, 600.0f, 800.0f, -600.0f, 0.0f, 1.0f };
+
 			VkRect2D scissor { { 0, 0 }, { renderer->wrapper->width, renderer->wrapper->height } };
 
 			VkPipelineViewportStateCreateInfo default_ppl_view { PplView(1, &viewport, 1, &scissor) };
 
 			VkPipelineMultisampleStateCreateInfo default_ppl_sample { PplSample(VK_SAMPLE_COUNT_1_BIT, VK_FALSE, 0.0f, nullptr, VK_FALSE, VK_FALSE) };
-			// VkPipelineMultisampleStateCreateInfo default_ppl_sample { PplSample(VK_SAMPLE_COUNT_1_BIT, VK_FALSE, 0.0f, nullptr, VK_FALSE, VK_FALSE) };
 
 			VkPipelineRasterizationStateCreateInfo default_ppl_rast { PplRast(VK_FALSE, VK_FALSE, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, VK_FALSE, 0.0f, 0.0f, 0.0f, 1.0f) };
 
@@ -817,6 +831,8 @@ namespace XGK
 				VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
 			};
 
+			cout << "MMM 222" << endl;
+
 			VkPipelineColorBlendStateCreateInfo default_ppl_blend
 			{
 				PplBlend
@@ -834,8 +850,8 @@ namespace XGK
 
 			VkPipelineShaderStageCreateInfo ppl_stages []
 			{
-				PplShader(VK_SHADER_STAGE_VERTEX_BIT, renderer->device.Shader(sizeof(wrapper->spirv_code_vertex), wrapper->spirv_code_vertex.data())),
-				PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, renderer->device.Shader(sizeof(wrapper->spirv_code_fragment), wrapper->spirv_code_fragment.data()))
+				PplShader(VK_SHADER_STAGE_VERTEX_BIT, renderer->device.Shader(wrapper->spirv_code_vertex.size() * sizeof(uint32_t), wrapper->spirv_code_vertex.data())),
+				PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, renderer->device.Shader(wrapper->spirv_code_fragment.size() * sizeof(uint32_t), wrapper->spirv_code_fragment.data()))
 			};
 
 			VkVertexInputBindingDescription vertex_binding { 0, 12, VK_VERTEX_INPUT_RATE_VERTEX };
@@ -843,7 +859,24 @@ namespace XGK
 
 			VkPipelineVertexInputStateCreateInfo ppl_vertex { PplVertex(1, &vertex_binding, 1, &vertex_attr) };
 
-			VkPipelineLayout ppl_layout = renderer->device.PplLayout(1, &descr_set_layout);
+			cout << "MMM 333" << endl;
+
+
+
+			std::vector<VkDescriptorSetLayout> descr_set_layouts {};
+
+			for (API::DescriptorSet* descriptor_set_wrapper : wrapper->descriptor_sets)
+			{
+				DescriptorSet* descriptor_set { new DescriptorSet { renderer, descriptor_set_wrapper } };
+
+				cout << "MMM 444" << endl;
+
+				descr_set_layouts.push_back(descriptor_set->layout);
+			}
+
+			ppl_layout = renderer->device.PplLayout(descr_set_layouts.size(), descr_set_layouts.data());
+
+
 
 			ppl =
 				renderer->device.PplG
@@ -861,73 +894,34 @@ namespace XGK
 					ppl_layout,
 					renderer->render_pass, 0
 				);
-
-
-
-			// for (API::UniformBlock* uniform_block_wrapper : wrapper->uniform_blocks)
-			// {
-			// 	UniformBlock* uniform_block { new UniformBlock { renderer, uniform_block_wrapper } };
-
-			// 	glUniformBlockBinding
-			// 	(
-			// 		program,
-			// 		glGetUniformBlockIndex(program, (const GLchar*) uniform_block_wrapper->name.c_str()),
-			// 		uniform_block_wrapper->binding
-			// 	);
-
-			// 	uniform_blocks.push_back(uniform_block);
-			// }
-
-
-
-			// Initially update uniforms.
-			use();
 		}
 
 		void Material::use (void)
 		{
 			// Material::used_instance = this;
 
-			// glUseProgram(program);
-
-			// // for (size_t i {}; i < uniforms.size(); ++i)
-			// // {
-			// // 	Uniform* uniform = uniforms[i];
-
-			// // 	uniform->update(uniform);
-			// // }
-
-			// for (Uniform* uniform : uniforms)
-			// {
-			// 	uniform->update(uniform);
-			// }
+			vkCmdBindPipeline(renderer->cmd_buffers[renderer->curr_image], VK_PIPELINE_BIND_POINT_GRAPHICS, ppl);
 		}
 
 
 
-		// Object::Object (RendererBase* _renderer, API::Object* _wrapper)
-		// {
-		// 	renderer = _renderer;
-		// 	wrapper = _wrapper;
-		// }
+		Object::Object (RendererBase* _renderer, API::Object* _wrapper)
+		{
+			renderer = _renderer;
+			wrapper = _wrapper;
+		}
 
-		// void Object::draw (void) const
-		// {
-		// 	glDrawArrays
-		// 	(
-		// 		// Material::used_instance->topology,
-		// 		GL_TRIANGLES,
-		// 		wrapper->scene_vertex_data_offset,
-		// 		wrapper->scene_vertex_data_length
-		// 	);
-		// }
+		void Object::draw (void) const
+		{
+			vkCmdDraw(renderer->cmd_buffers[renderer->curr_image], wrapper->scene_vertex_data_length, 1, wrapper->scene_vertex_data_offset, 0);
+		}
 
 
 
-		// Scene::Scene (RendererBase* _renderer, API::Scene* _wrapper)
-		// {
-		// 	renderer = _renderer;
-		// 	wrapper = _wrapper;
-		// }
+		Scene::Scene (RendererBase* _renderer, API::Scene* _wrapper)
+		{
+			renderer = _renderer;
+			wrapper = _wrapper;
+		}
 	}
 }

@@ -100,26 +100,26 @@ using std::endl;
 
 
 
-#define XGK_VULKAN_MACRO_DECLARE_DEBUG_REPORT_CALLBACKS\
-	VkDebugReportCallbackEXT report_error { VK_NULL_HANDLE };\
-	// VkDebugReportCallbackEXT report_info { VK_NULL_HANDLE };\
-	// VkDebugReportCallbackEXT report_warn { VK_NULL_HANDLE };\
-	// VkDebugReportCallbackEXT report_perf { VK_NULL_HANDLE };\
-	// VkDebugReportCallbackEXT report_debug { VK_NULL_HANDLE };
+// #define XGK_VULKAN_MACRO_DECLARE_DEBUG_REPORT_CALLBACKS\
+// 	VkDebugReportCallbackEXT report_error { VK_NULL_HANDLE };\
+// 	// VkDebugReportCallbackEXT report_info { VK_NULL_HANDLE };\
+// 	// VkDebugReportCallbackEXT report_warn { VK_NULL_HANDLE };\
+// 	// VkDebugReportCallbackEXT report_perf { VK_NULL_HANDLE };\
+// 	// VkDebugReportCallbackEXT report_debug { VK_NULL_HANDLE };
 
-#define XGK_VULKAN_MACRO_CREATE_DEBUG_REPORT_CALLBACKS(instance)\
-	report_error = DebugReportCallbackEXT(&reportError, VK_DEBUG_REPORT_ERROR_BIT_EXT);\
-	// report_info = DebugReportCallbackEXT(&reportInfo, VK_DEBUG_REPORT_INFORMATION_BIT_EXT);\
-	// report_warn = DebugReportCallbackEXT(&reportWarn, VK_DEBUG_REPORT_WARNING_BIT_EXT);\
-	// report_perf = DebugReportCallbackEXT(&reportPerf, VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT);\
-	// report_debug = DebugReportCallbackEXT(&reportDebug, VK_DEBUG_REPORT_DEBUG_BIT_EXT);
+// #define XGK_VULKAN_MACRO_CREATE_DEBUG_REPORT_CALLBACKS(instance)\
+// 	report_error = DebugReportCallbackEXT(&reportError, VK_DEBUG_REPORT_ERROR_BIT_EXT);\
+// 	// report_info = DebugReportCallbackEXT(&reportInfo, VK_DEBUG_REPORT_INFORMATION_BIT_EXT);\
+// 	// report_warn = DebugReportCallbackEXT(&reportWarn, VK_DEBUG_REPORT_WARNING_BIT_EXT);\
+// 	// report_perf = DebugReportCallbackEXT(&reportPerf, VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT);\
+// 	// report_debug = DebugReportCallbackEXT(&reportDebug, VK_DEBUG_REPORT_DEBUG_BIT_EXT);
 
-#define XGK_VULKAN_MACRO_DESTROY_DEBUG_REPORT_CALLBACKS(instance)\
-	vkDestroyDebugReportCallbackEXT(instance, report_error, nullptr);\
-	// vkDestroyDebugReportCallbackEXT(instance, report_debug, nullptr);\
-	// vkDestroyDebugReportCallbackEXT(instance, report_perf, nullptr);\
-	// vkDestroyDebugReportCallbackEXT(instance, report_warn, nullptr);\
-	// vkDestroyDebugReportCallbackEXT(instance, report_info, nullptr);
+// #define XGK_VULKAN_MACRO_DESTROY_DEBUG_REPORT_CALLBACKS(instance)\
+// 	vkDestroyDebugReportCallbackEXT(instance, report_error, nullptr);\
+// 	// vkDestroyDebugReportCallbackEXT(instance, report_debug, nullptr);\
+// 	// vkDestroyDebugReportCallbackEXT(instance, report_perf, nullptr);\
+// 	// vkDestroyDebugReportCallbackEXT(instance, report_warn, nullptr);\
+// 	// vkDestroyDebugReportCallbackEXT(instance, report_info, nullptr);
 
 
 
@@ -203,6 +203,7 @@ DECL_PROC(vkCmdPushConstants);
 DECL_PROC(vkCmdSetScissor);
 DECL_PROC(vkCmdDrawIndexed);
 DECL_PROC(vkCmdCopyBufferToImage);
+DECL_PROC(vkCmdUpdateBuffer);
 DECL_PROC(vkEndCommandBuffer);
 DECL_PROC(vkResetCommandBuffer);
 
@@ -468,26 +469,26 @@ namespace XGK::VULKAN::WRAPPERS
 
 
 
-	#ifdef DEBUG
-		#define DEBUG_REPORT_ARGS \
-			\
-			VkDebugReportFlagsEXT      flags,\
-			VkDebugReportObjectTypeEXT objectType,\
-			uint64_t                   object,\
-			size_t                     location,\
-			int32_t                    messageCode,\
-			const char*                pLayerPrefix,\
-			const char*                pMessage,\
-			void*                      pUserData
+	// #ifdef DEBUG
+	// 	#define DEBUG_REPORT_ARGS \
+	// 		\
+	// 		VkDebugReportFlagsEXT      flags,\
+	// 		VkDebugReportObjectTypeEXT objectType,\
+	// 		uint64_t                   object,\
+	// 		size_t                     location,\
+	// 		int32_t                    messageCode,\
+	// 		const char*                pLayerPrefix,\
+	// 		const char*                pMessage,\
+	// 		void*                      pUserData
 
-		VkBool32 reportError(DEBUG_REPORT_ARGS);
-		VkBool32 reportInfo(DEBUG_REPORT_ARGS);
-		VkBool32 reportWarn(DEBUG_REPORT_ARGS);
-		VkBool32 reportPerf(DEBUG_REPORT_ARGS);
-		VkBool32 reportDebug(DEBUG_REPORT_ARGS);
+	// 	VkBool32 reportError(DEBUG_REPORT_ARGS);
+	// 	VkBool32 reportInfo(DEBUG_REPORT_ARGS);
+	// 	VkBool32 reportWarn(DEBUG_REPORT_ARGS);
+	// 	VkBool32 reportPerf(DEBUG_REPORT_ARGS);
+	// 	VkBool32 reportDebug(DEBUG_REPORT_ARGS);
 
-		#undef DEBUG_REPORT_ARGS
-	#endif
+	// 	#undef DEBUG_REPORT_ARGS
+	// #endif
 
 
 
@@ -499,153 +500,153 @@ namespace XGK::VULKAN::WRAPPERS
 
 		std::vector<VkSurfaceKHR> surfaces;
 
-		#ifdef DEBUG
-			XGK_VULKAN_MACRO_DECLARE_DEBUG_REPORT_CALLBACKS
-		#endif
+		// #ifdef DEBUG
+		// 	XGK_VULKAN_MACRO_DECLARE_DEBUG_REPORT_CALLBACKS
+		// #endif
 
 
 
-			VkDebugReportCallbackEXT DebugReportCallbackEXT
-			(
-				PFN_vkDebugReportCallbackEXT pfnCallback = nullptr,
-				VkDebugReportFlagsEXT        flags       = 0,
-				void*                        pUserData   = nullptr,
-				const void*                  pNext       = nullptr,
-				const VkAllocationCallbacks* pAllocator  = nullptr
-			)
+		VkDebugReportCallbackEXT DebugReportCallbackEXT
+		(
+			PFN_vkDebugReportCallbackEXT pfnCallback = nullptr,
+			VkDebugReportFlagsEXT        flags       = 0,
+			void*                        pUserData   = nullptr,
+			const void*                  pNext       = nullptr,
+			const VkAllocationCallbacks* pAllocator  = nullptr
+		)
+		{
+			VkDebugReportCallbackCreateInfoEXT info =
 			{
-				VkDebugReportCallbackCreateInfoEXT info =
+				VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
+				pNext,
+				flags,
+				pfnCallback,
+				pUserData,
+			};
+
+			VkDebugReportCallbackEXT report_callback = VK_NULL_HANDLE;
+
+			vkCreateDebugReportCallbackEXT(handle, &info, pAllocator, &report_callback);
+
+			return report_callback;
+		}
+
+		void enumDevs (void)
+		{
+			vkEnumeratePhysicalDevices(handle, &physical_device_count, nullptr);
+
+			physical_devices = new VkPhysicalDevice[physical_device_count];
+
+			vkEnumeratePhysicalDevices(handle, &physical_device_count, physical_devices);
+		}
+
+		void create
+		(
+			const                        VkApplicationInfo* pApplicationInfo = nullptr,
+			uint32_t                     enabledLayerCount                   = 0,
+			const char* const*           ppEnabledLayerNames                 = nullptr,
+			uint32_t                     enabledExtensionCount               = 0,
+			const char* const*           ppEnabledExtensionNames             = nullptr,
+			VkInstanceCreateFlags        flags                               = 0,
+			const void*                  pNext                               = nullptr,
+			const VkAllocationCallbacks* pAllocator                          = nullptr
+		)
+		{
+			VkInstanceCreateInfo info =
+			{
+				VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+				pNext,
+				flags,
+				pApplicationInfo,
+				enabledLayerCount,
+				ppEnabledLayerNames,
+				enabledExtensionCount,
+				ppEnabledExtensionNames,
+			};
+
+			loadSharedLibrary();
+
+			loadGlobalFunctions();
+
+			vkCreateInstance(&info, pAllocator, &handle);
+
+			loadInstanceFunctions(handle);
+
+			#ifdef DEBUG
+				XGK_VULKAN_MACRO_CREATE_DEBUG_REPORT_CALLBACKS(handle)
+			#endif
+
+			enumDevs();
+		}
+
+		VkSurfaceKHR SurfaceKHR
+		(
+			#if defined(__linux__)
+				Display*                     dpy        = nullptr,
+				Window                       window     = 0,
+				VkXlibSurfaceCreateFlagsKHR  flags      = 0,
+			#elif defined(_WIN64)
+				HINSTANCE                    hinstance  = 0,
+				HWND                         hwnd       = 0,
+				VkWin32SurfaceCreateFlagsKHR flags      = 0,
+			#endif
+
+			const void*                    pNext      = nullptr,
+			const VkAllocationCallbacks*   pAllocator = nullptr
+		)
+		{
+			#if defined(__linux__)
+				VkXlibSurfaceCreateInfoKHR info =
 				{
-					VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT,
+					VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
 					pNext,
 					flags,
-					pfnCallback,
-					pUserData,
+					dpy,
+					window,
 				};
-
-				VkDebugReportCallbackEXT report_callback = VK_NULL_HANDLE;
-
-				vkCreateDebugReportCallbackEXT(handle, &info, pAllocator, &report_callback);
-
-				return report_callback;
-			}
-
-			void enumDevs (void)
-			{
-				vkEnumeratePhysicalDevices(handle, &physical_device_count, nullptr);
-
-				physical_devices = new VkPhysicalDevice[physical_device_count];
-
-				vkEnumeratePhysicalDevices(handle, &physical_device_count, physical_devices);
-			}
-
-			void create
-			(
-				const                        VkApplicationInfo* pApplicationInfo = nullptr,
-				uint32_t                     enabledLayerCount                   = 0,
-				const char* const*           ppEnabledLayerNames                 = nullptr,
-				uint32_t                     enabledExtensionCount               = 0,
-				const char* const*           ppEnabledExtensionNames             = nullptr,
-				VkInstanceCreateFlags        flags                               = 0,
-				const void*                  pNext                               = nullptr,
-				const VkAllocationCallbacks* pAllocator                          = nullptr
-			)
-			{
-				VkInstanceCreateInfo info =
+			#elif defined(_WIN64)
+				VkWin32SurfaceCreateInfoKHR info =
 				{
-					VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+					VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
 					pNext,
 					flags,
-					pApplicationInfo,
-					enabledLayerCount,
-					ppEnabledLayerNames,
-					enabledExtensionCount,
-					ppEnabledExtensionNames,
+					hinstance,
+					hwnd,
 				};
+			#endif
 
-				loadSharedLibrary();
+			VkSurfaceKHR surface = VK_NULL_HANDLE;
 
-				loadGlobalFunctions();
+			#if defined(__linux__)
+				vkCreateXlibSurfaceKHR(handle, &info, pAllocator, &surface);
+			#elif defined(_WIN64)
+				vkCreateWin32SurfaceKHR(handle, &info, pAllocator, &surface);
+			#endif
 
-				vkCreateInstance(&info, pAllocator, &handle);
+			surfaces.push_back(surface);
 
-				loadInstanceFunctions(handle);
+			return surface;
+		}
 
-				#ifdef DEBUG
-					XGK_VULKAN_MACRO_CREATE_DEBUG_REPORT_CALLBACKS(handle)
-				#endif
+		void destroy (void)
+		{
+			delete[] physical_devices;
 
-				enumDevs();
-			}
-
-			VkSurfaceKHR SurfaceKHR
-			(
-				#if defined(__linux__)
-					Display*                     dpy        = nullptr,
-					Window                       window     = 0,
-					VkXlibSurfaceCreateFlagsKHR  flags      = 0,
-				#elif defined(_WIN64)
-					HINSTANCE                    hinstance  = 0,
-					HWND                         hwnd       = 0,
-					VkWin32SurfaceCreateFlagsKHR flags      = 0,
-				#endif
-
-				const void*                    pNext      = nullptr,
-				const VkAllocationCallbacks*   pAllocator = nullptr
-			)
+			for (uint64_t i = 0; i < surfaces.size(); ++i)
 			{
-				#if defined(__linux__)
-					VkXlibSurfaceCreateInfoKHR info =
-					{
-						VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,
-						pNext,
-						flags,
-						dpy,
-						window,
-					};
-				#elif defined(_WIN64)
-					VkWin32SurfaceCreateInfoKHR info =
-					{
-						VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,
-						pNext,
-						flags,
-						hinstance,
-						hwnd,
-					};
-				#endif
-
-				VkSurfaceKHR surface = VK_NULL_HANDLE;
-
-				#if defined(__linux__)
-					vkCreateXlibSurfaceKHR(handle, &info, pAllocator, &surface);
-				#elif defined(_WIN64)
-					vkCreateWin32SurfaceKHR(handle, &info, pAllocator, &surface);
-				#endif
-
-				surfaces.push_back(surface);
-
-				return surface;
+				vkDestroySurfaceKHR(handle, surfaces[i], nullptr);
 			}
 
-			void destroy (void)
-			{
-				delete[] physical_devices;
+			surfaces.resize(0);
 
-				for (uint64_t i = 0; i < surfaces.size(); ++i)
-				{
-					vkDestroySurfaceKHR(handle, surfaces[i], nullptr);
-				}
+			#ifdef DEBUG
+				XGK_VULKAN_MACRO_DESTROY_DEBUG_REPORT_CALLBACKS(handle);
+			#endif
 
-				surfaces.resize(0);
+			vkDestroyInstance(handle, nullptr);
 
-				#ifdef DEBUG
-					XGK_VULKAN_MACRO_DESTROY_DEBUG_REPORT_CALLBACKS(handle);
-				#endif
-
-				vkDestroyInstance(handle, nullptr);
-
-				freeSharedLibrary();
-			}
+			freeSharedLibrary();
+		}
 	};
 
 
@@ -2080,9 +2081,9 @@ namespace XGK::VULKAN::WRAPPERS
 
 
 
-#undef XGK_VULKAN_MACRO_DESTROY_DEBUG_REPORT_CALLBACKS
-#undef XGK_VULKAN_MACRO_CREATE_DEBUG_REPORT_CALLBACKS
-#undef XGK_VULKAN_MACRO_DECLARE_DEBUG_REPORT_CALLBACKS
+// #undef XGK_VULKAN_MACRO_DESTROY_DEBUG_REPORT_CALLBACKS
+// #undef XGK_VULKAN_MACRO_CREATE_DEBUG_REPORT_CALLBACKS
+// #undef XGK_VULKAN_MACRO_DECLARE_DEBUG_REPORT_CALLBACKS
 
 #undef SHARED_LIBRARY_FREE
 #undef SHARED_LIBRARY_LOAD
@@ -2116,6 +2117,8 @@ namespace XGK
 			Device device {};
 			VkQueue graphics_queue { VK_NULL_HANDLE };
 			VkQueue present_queue { VK_NULL_HANDLE };
+
+			VkDescriptorPool descriptor_pool { VK_NULL_HANDLE };
 
 			uint64_t swapchain_image_count {};
 
@@ -2160,29 +2163,6 @@ namespace XGK
 
 
 
-		// struct RendererOffscreen : public RendererBase
-		// {
-		// 	void* pixel_data {};
-
-		// 	GLuint framebuffer {};
-		// 	GLuint framebuffer_renderbuffer_color {};
-		// 	GLuint framebuffer_renderbuffer_depth {};
-		// 	GLuint pixel_pack_buffer {};
-
-		// 	size_t pbo_index {};
-		// 	size_t next_pbo_index { 1 };
-
-
-
-		// 	RendererOffscreen (API::Renderer*);
-
-
-
-		// 	virtual void endLoop (void) override;
-		// };
-
-
-
 		struct Uniform
 		{
 			// uniform_update_t functions
@@ -2197,9 +2177,9 @@ namespace XGK
 
 			// GLint locaiton {};
 
-			using uniform_update_t = void (*) (Uniform*);
+			// using uniform_update_t = void (*) (Uniform*);
 
-			uniform_update_t update {};
+			// uniform_update_t update {};
 
 
 
@@ -2218,23 +2198,17 @@ namespace XGK
 
 			size_t buffer_length {};
 
+			void* mapped_memory_addr {};
+
 			std::vector<Uniform*> uniforms {};
 
-			VkDescriptorBufferInfo descr_bi { VK_NULL_HANDLE, 0, VK_WHOLE_SIZE };
+			VkDescriptorBufferInfo descr_bi { buffer, 0, VK_WHOLE_SIZE };
 
-			VkWriteDescriptorSet entry =
-				WriteDescrSet
-				(
-					VK_NULL_HANDLE, 0, 0,
-					1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-					nullptr,
-					&descr_bi,
-					nullptr
-				);
+			// VkWriteDescriptorSet entry {};
 
-			VkDescriptorSetLayoutBinding entry_layout
+			VkDescriptorSetLayoutBinding layout
 			{
-				.binding = 1,
+				.binding = 0,
 				.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
 				.descriptorCount = 1,
 				.stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
@@ -2252,10 +2226,30 @@ namespace XGK
 
 
 
-		struct DecsriptorSet
+		struct Material;
+
+		struct DescriptorSet
 		{
 			RendererBase* renderer {};
-			API::Material* wrapper {};
+			API::DescriptorSet* wrapper {};
+
+
+
+			std::vector<UniformBlock*> bindings {};
+
+
+
+			VkDescriptorSetLayout layout {};
+
+			VkDescriptorSet handle {};
+
+
+
+			DescriptorSet (RendererBase*, API::DescriptorSet*);
+
+
+
+			void use (Material*);
 		};
 
 
@@ -2284,6 +2278,7 @@ namespace XGK
 
 			VkPrimitiveTopology topology {};
 
+			VkPipelineLayout ppl_layout {};
 			VkPipeline ppl {};
 
 			// GLuint program {};
