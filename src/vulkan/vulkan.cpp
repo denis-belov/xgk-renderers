@@ -282,7 +282,7 @@ namespace XGK
 
 			// cout << inst.physical_devices << endl;
 
-			VkPhysicalDevice physical_device { inst.physical_devices[0] };
+			VkPhysicalDevice physical_device { inst.physical_devices[1] };
 			// VkPhysicalDeviceProperties pProperties = {};
 			// vkGetPhysicalDeviceProperties(physical_device, &pProperties);
 			// cout << inst.physical_device_count << endl;
@@ -626,7 +626,7 @@ namespace XGK
 
 		UniformBlock::UniformBlock (RendererBase* _renderer, API::UniformBlock* _wrapper)
 		{
-			// cout << "UB 111" << endl;
+			cout << "NEW UNIFORM BLOCK!!!!" << endl;
 			renderer = _renderer;
 			wrapper = _wrapper;
 
@@ -658,8 +658,6 @@ namespace XGK
 
 
 			buffer = renderer->device.Buffer(buffer_length, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_SHARING_MODE_EXCLUSIVE);
-
-			cout << "UB 222" << endl;
 
 			VkMemoryRequirements vk_uniform_buffer_mem_reqs { renderer->device.MemReqs(buffer) };
 
@@ -699,7 +697,7 @@ namespace XGK
 				 */
 				// vkCmdUpdateBuffer(renderer->cmd_buffers[renderer->curr_image], buffer, 0, uniform->wrapper->size, uniform->wrapper->object_addr);
 
-				memcpy(mapped_memory_addr, uniform->wrapper->object_addr, uniform->wrapper->size);
+				memcpy(mapped_memory_addr + uniform->wrapper->block_index, uniform->wrapper->object_addr, uniform->wrapper->size);
 			}
 		}
 
@@ -707,6 +705,7 @@ namespace XGK
 
 		DescriptorSet::DescriptorSet (RendererBase* _renderer, API::DescriptorSet* _wrapper)
 		{
+			cout << "NEW DESCRIPTOR SET!!!!" << endl;
 			renderer = _renderer;
 			wrapper = _wrapper;
 
@@ -715,26 +714,24 @@ namespace XGK
 			std::vector<VkDescriptorSetLayoutBinding> descr_set_layout_bindings {};
 			std::vector<VkWriteDescriptorSet> write_descr_sets {};
 
-			cout << "DS 111" << endl;
-
 			for (API::UniformBlock* binding_wrapper : wrapper->bindings)
 			{
-				cout << "DS 222" << endl;
 				UniformBlock* binding { new UniformBlock { renderer, binding_wrapper } };
-				cout << "DS 333" << endl;
 
 				bindings.push_back(binding);
 
 				descr_set_layout_bindings.push_back(binding->layout);
 			}
 
-			layout = renderer->device.DescrSetLayout(1, descr_set_layout_bindings.data());
+			cout << "Bindings: " << descr_set_layout_bindings.size() << endl;
+			layout = renderer->device.DescrSetLayout(descr_set_layout_bindings.size(), descr_set_layout_bindings.data());
 
 			handle = renderer->device.DescrSet(renderer->descriptor_pool, 1, &layout).data()[0];
 
+			cout << "handle: " << handle << endl;
+
 			for (UniformBlock* binding : bindings)
 			{
-				cout << "binding: " <<  binding->wrapper->binding << endl;
 				VkWriteDescriptorSet write_descr_set =
 					WriteDescrSet
 					(
@@ -745,19 +742,39 @@ namespace XGK
 						nullptr
 					);
 
-				// write_descr_set.dstSet = handle;
-
 				write_descr_sets.push_back(write_descr_set);
 			}
 
 
 
 			renderer->device.updateDescrSets(write_descr_sets.size(), write_descr_sets.data(), 0, nullptr);
-
-
-
-			// use();
 		}
+
+		// void DescriptorSet::goOn (void)
+		// {
+		// 	// handle = renderer->device.DescrSet(renderer->descriptor_pool, 1, &layout).data()[0];
+
+		// 	std::vector<VkWriteDescriptorSet> write_descr_sets {};
+
+		// 	for (UniformBlock* binding : bindings)
+		// 	{
+		// 		VkWriteDescriptorSet write_descr_set =
+		// 			WriteDescrSet
+		// 			(
+		// 				handle, binding->wrapper->binding, 0,
+		// 				1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+		// 				nullptr,
+		// 				&binding->descr_bi,
+		// 				nullptr
+		// 			);
+
+		// 		write_descr_sets.push_back(write_descr_set);
+		// 	}
+
+
+
+		// 	renderer->device.updateDescrSets(write_descr_sets.size(), write_descr_sets.data(), 0, nullptr);
+		// }
 
 		void DescriptorSet::use (Material* material)
 		{
@@ -783,8 +800,6 @@ namespace XGK
 
 
 			topology = Material::TOPOLOGY[static_cast<size_t>(wrapper->topology)];
-
-			cout << "MMM 111" << endl;
 
 
 
@@ -831,8 +846,6 @@ namespace XGK
 				VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT
 			};
 
-			cout << "MMM 222" << endl;
-
 			VkPipelineColorBlendStateCreateInfo default_ppl_blend
 			{
 				PplBlend
@@ -859,8 +872,6 @@ namespace XGK
 
 			VkPipelineVertexInputStateCreateInfo ppl_vertex { PplVertex(1, &vertex_binding, 1, &vertex_attr) };
 
-			cout << "MMM 333" << endl;
-
 
 
 			std::vector<VkDescriptorSetLayout> descr_set_layouts {};
@@ -868,8 +879,6 @@ namespace XGK
 			for (API::DescriptorSet* descriptor_set_wrapper : wrapper->descriptor_sets)
 			{
 				DescriptorSet* descriptor_set { new DescriptorSet { renderer, descriptor_set_wrapper } };
-
-				cout << "MMM 444" << endl;
 
 				descr_set_layouts.push_back(descriptor_set->layout);
 			}

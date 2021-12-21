@@ -535,6 +535,8 @@ namespace XGK::VULKAN::WRAPPERS
 		{
 			vkEnumeratePhysicalDevices(handle, &physical_device_count, nullptr);
 
+			cout << "physical_device_count: " << physical_device_count << endl;
+
 			physical_devices = new VkPhysicalDevice[physical_device_count];
 
 			vkEnumeratePhysicalDevices(handle, &physical_device_count, physical_devices);
@@ -1125,6 +1127,11 @@ namespace XGK::VULKAN::WRAPPERS
 
 		void getProps (VkPhysicalDevice physical_device, VkSurfaceKHR surface)
 		{
+			VkPhysicalDeviceProperties device_props {};
+			vkGetPhysicalDeviceProperties(physical_device, &device_props);
+
+			std::cout << "device_props.deviceName: " << device_props.deviceName << std::endl;
+
 			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_prop_count, nullptr);
 			queue_family_props = new VkQueueFamilyProperties[queue_family_prop_count];
 			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_prop_count, queue_family_props);
@@ -1767,10 +1774,10 @@ namespace XGK::VULKAN::WRAPPERS
 
 		std::vector<VkDescriptorSet> DescrSet
 		(
-			VkDescriptorPool             descriptorPool        = VK_NULL_HANDLE,
-			uint32_t                     descriptorSetCount    = 0,
-			const VkDescriptorSetLayout* pSetdescr_set_layouts = nullptr,
-			const void*                  pNext                 = nullptr
+			VkDescriptorPool             descriptorPool     = VK_NULL_HANDLE,
+			uint32_t                     descriptorSetCount = 0,
+			const VkDescriptorSetLayout* pSetLayouts        = nullptr,
+			const void*                  pNext              = nullptr
 		)
 		{
 			VkDescriptorSetAllocateInfo info =
@@ -1779,13 +1786,25 @@ namespace XGK::VULKAN::WRAPPERS
 				pNext,
 				descriptorPool,
 				descriptorSetCount,
-				pSetdescr_set_layouts,
+				pSetLayouts,
 			};
+
+			cout << "DESCR: " << descriptorSetCount << endl;
 
 			std::vector<VkDescriptorSet> sets(descriptorSetCount);
 
 			vkAllocateDescriptorSets(handle, &info, sets.data());
-			// cout << vkAllocateDescriptorSets(handle, &info, sets.data()) << endl;
+
+			VkResult result = vkAllocateDescriptorSets(handle, &info, sets.data());
+
+			switch (result)
+			{
+				case VK_ERROR_OUT_OF_HOST_MEMORY: cout << "vkAllocateDescriptorSets: VK_ERROR_OUT_OF_HOST_MEMORY" << endl; break;
+				case VK_ERROR_OUT_OF_DEVICE_MEMORY: cout << "vkAllocateDescriptorSets: VK_ERROR_OUT_OF_DEVICE_MEMORY" << endl; break;
+				case VK_ERROR_FRAGMENTED_POOL: cout << "vkAllocateDescriptorSets: VK_ERROR_FRAGMENTED_POOL" << endl; break;
+				case VK_ERROR_OUT_OF_POOL_MEMORY: cout << "vkAllocateDescriptorSets: VK_ERROR_OUT_OF_POOL_MEMORY" << endl; break;
+				default:;
+			}
 
 			return sets;
 		}
@@ -2102,6 +2121,10 @@ namespace XGK
 	{
 		struct RendererBase
 		{
+			static std::vector<RendererBase> dynamic_instances;
+
+
+
 			API::Renderer* wrapper {};
 
 			GLFWwindow* window {};
@@ -2165,6 +2188,7 @@ namespace XGK
 
 		struct Uniform
 		{
+			static std::vector<Uniform> dynamic_instances;
 			// uniform_update_t functions
 			// static void uniformMatrix4fv (Uniform*);
 
@@ -2191,6 +2215,10 @@ namespace XGK
 
 		struct UniformBlock
 		{
+			static std::vector<UniformBlock> dynamic_instances;
+
+
+
 			RendererBase* renderer {};
 			API::UniformBlock* wrapper {};
 
@@ -2230,6 +2258,10 @@ namespace XGK
 
 		struct DescriptorSet
 		{
+			static std::vector<DescriptorSet> dynamic_instances;
+
+
+
 			RendererBase* renderer {};
 			API::DescriptorSet* wrapper {};
 
@@ -2249,6 +2281,7 @@ namespace XGK
 
 
 
+			void goOn (void);
 			void use (Material*);
 		};
 
@@ -2256,6 +2289,8 @@ namespace XGK
 
 		struct Material
 		{
+			static std::vector<Material> dynamic_instances;
+
 			static Material* used_instance;
 
 			// VK_PRIMITIVE_TOPOLOGY_POINT_LIST = 0,
@@ -2299,6 +2334,10 @@ namespace XGK
 
 		struct Object
 		{
+			static std::vector<Object> dynamic_instances;
+
+
+
 			RendererBase* renderer {};
 			API::Object* wrapper {};
 
@@ -2315,6 +2354,10 @@ namespace XGK
 
 		struct Scene
 		{
+			static std::vector<Scene> dynamic_instances;
+
+
+
 			RendererBase* renderer {};
 			API::Scene* wrapper {};
 
