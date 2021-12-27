@@ -176,6 +176,48 @@ namespace XGK
 
 			Scene (RendererBase*, API::Scene*);
 		};
+
+
+
+		template <class T, class WrapperT>
+		T* getInstance (RendererBase* renderer, WrapperT* wrapper)
+		{
+			T* instance {};
+
+			if (wrapper->opengl_impl)
+			{
+				instance = static_cast<T*>(wrapper->opengl_impl);
+			}
+			else
+			{
+				instance = new T { renderer, wrapper };
+
+				wrapper->opengl_impl = instance;
+			}
+
+			return instance;
+		}
+
+		// template <class T>
+		// T* getInstance (RendererBase* renderer, void* _wrapper)
+		// {
+		// 	API::T* wrapper = static_cast<API::T*>(_wrapper);
+
+		// 	T* instance {};
+
+		// 	if (wrapper->opengl_impl)
+		// 	{
+		// 		instance = static_cast<T*>(wrapper->opengl_impl);
+		// 	}
+		// 	else
+		// 	{
+		// 		instance = new T { renderer, wrapper };
+
+		// 		wrapper->opengl_impl = instance;
+		// 	}
+
+		// 	return instance;
+		// }
 	}
 }
 

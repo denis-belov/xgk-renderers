@@ -1,5 +1,5 @@
-#ifndef __XGK_API_VULKAN__
-#define __XGK_API_VULKAN__
+#ifndef __XGK_RENDERERS_VULKAN__
+#define __XGK_RENDERERS_VULKAN__
 
 
 
@@ -1789,11 +1789,7 @@ namespace XGK::VULKAN::WRAPPERS
 				pSetLayouts,
 			};
 
-			cout << "DESCR: " << descriptorSetCount << endl;
-
 			std::vector<VkDescriptorSet> sets(descriptorSetCount);
-
-			vkAllocateDescriptorSets(handle, &info, sets.data());
 
 			VkResult result = vkAllocateDescriptorSets(handle, &info, sets.data());
 
@@ -2365,6 +2361,27 @@ namespace XGK
 
 			Scene (RendererBase*, API::Scene*);
 		};
+
+
+
+		template <class T, class WrapperT>
+		T* getInstance (RendererBase* renderer, WrapperT* wrapper)
+		{
+			T* instance {};
+
+			if (wrapper->vulkan_impl)
+			{
+				instance = static_cast<T*>(wrapper->vulkan_impl);
+			}
+			else
+			{
+				instance = new T { renderer, wrapper };
+
+				wrapper->vulkan_impl = instance;
+			}
+
+			return instance;
+		}
 	}
 }
 

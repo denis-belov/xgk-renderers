@@ -161,11 +161,24 @@ namespace XGK
 
 			for (API::Uniform* uniform_wrapper : wrapper->uniforms)
 			{
-				Uniform* uniform { new Uniform { renderer, uniform_wrapper } };
+				// Uniform* uniform {};
 
-				buffer_length += uniform_wrapper->size;
+				// if (uniform_wrapper->opengl_impl)
+				// {
+				// 	uniform = static_cast<Uniform*>(uniform_wrapper->opengl_impl);
+				// }
+				// else
+				// {
+				// 	uniform = new Uniform { renderer, uniform_wrapper };
+
+				// 	uniform_wrapper->opengl_impl = uniform;
+				// }
+
+				Uniform* uniform { getInstance<Uniform, API::Uniform>(renderer, uniform_wrapper) };
 
 				uniforms.push_back(uniform);
+
+				buffer_length += uniform_wrapper->size;
 			}
 
 
@@ -303,7 +316,20 @@ namespace XGK
 
 			for (API::Uniform* uniform_wrapper : wrapper->uniforms)
 			{
-				Uniform* uniform { new Uniform { renderer, uniform_wrapper } };
+				// Uniform* uniform {};
+
+				// if (uniform_wrapper->opengl_impl)
+				// {
+				// 	uniform = static_cast<Uniform*>(uniform_wrapper->opengl_impl);
+				// }
+				// else
+				// {
+				// 	uniform = new Uniform { renderer, uniform_wrapper };
+
+				// 	uniform_wrapper->opengl_impl = uniform;
+				// }
+
+				Uniform* uniform { getInstance<Uniform, API::Uniform>(renderer, uniform_wrapper) };
 
 				uniform->location = glGetUniformLocation(program, (const GLchar*) uniform_wrapper->name.c_str());
 
@@ -319,7 +345,20 @@ namespace XGK
 
 			for (API::UniformBlock* uniform_block_wrapper : wrapper->uniform_blocks)
 			{
-				UniformBlock* uniform_block { new UniformBlock { renderer, uniform_block_wrapper } };
+				// UniformBlock* uniform_block {};
+
+				// if (uniform_block_wrapper->opengl_impl)
+				// {
+				// 	uniform_block = static_cast<UniformBlock*>(uniform_block_wrapper->opengl_impl);
+				// }
+				// else
+				// {
+				// 	uniform_block = new UniformBlock { renderer, uniform_block_wrapper };
+
+				// 	uniform_block_wrapper->opengl_impl = uniform_block;
+				// }
+
+				UniformBlock* uniform_block { getInstance<UniformBlock, API::UniformBlock>(renderer, uniform_block_wrapper) };
 
 				glUniformBlockBinding
 				(

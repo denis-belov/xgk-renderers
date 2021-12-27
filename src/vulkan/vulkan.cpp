@@ -626,7 +626,6 @@ namespace XGK
 
 		UniformBlock::UniformBlock (RendererBase* _renderer, API::UniformBlock* _wrapper)
 		{
-			cout << "NEW UNIFORM BLOCK!!!!" << endl;
 			renderer = _renderer;
 			wrapper = _wrapper;
 
@@ -648,7 +647,20 @@ namespace XGK
 
 			for (API::Uniform* uniform_wrapper : wrapper->uniforms)
 			{
-				Uniform* uniform { new Uniform { renderer, uniform_wrapper } };
+				// Uniform* uniform {};
+
+				// if (uniform_wrapper->vulkan_impl)
+				// {
+				// 	uniform = static_cast<Uniform*>(uniform_wrapper->vulkan_impl);
+				// }
+				// else
+				// {
+				// 	uniform = new Uniform { renderer, uniform_wrapper };
+
+				// 	uniform_wrapper->vulkan_impl = uniform;
+				// }
+
+				Uniform* uniform { getInstance<Uniform, API::Uniform>(renderer, uniform_wrapper) };
 
 				uniforms.push_back(uniform);
 
@@ -705,7 +717,6 @@ namespace XGK
 
 		DescriptorSet::DescriptorSet (RendererBase* _renderer, API::DescriptorSet* _wrapper)
 		{
-			cout << "NEW DESCRIPTOR SET!!!!" << endl;
 			renderer = _renderer;
 			wrapper = _wrapper;
 
@@ -716,7 +727,20 @@ namespace XGK
 
 			for (API::UniformBlock* binding_wrapper : wrapper->bindings)
 			{
-				UniformBlock* binding { new UniformBlock { renderer, binding_wrapper } };
+				// UniformBlock* binding {};
+
+				// if (binding_wrapper->vulkan_impl)
+				// {
+				// 	binding = static_cast<UniformBlock*>(binding_wrapper->vulkan_impl);
+				// }
+				// else
+				// {
+				// 	binding = new UniformBlock { renderer, binding_wrapper } ;
+
+				// 	binding_wrapper->vulkan_impl = binding;
+				// }
+
+				UniformBlock* binding { getInstance<UniformBlock, API::UniformBlock>(renderer, binding_wrapper) };
 
 				bindings.push_back(binding);
 
@@ -878,7 +902,20 @@ namespace XGK
 
 			for (API::DescriptorSet* descriptor_set_wrapper : wrapper->descriptor_sets)
 			{
-				DescriptorSet* descriptor_set { new DescriptorSet { renderer, descriptor_set_wrapper } };
+				// DescriptorSet* descriptor_set {};
+
+				// if (descriptor_set_wrapper->vulkan_impl)
+				// {
+				// 	descriptor_set = static_cast<DescriptorSet*>(descriptor_set_wrapper->vulkan_impl);
+				// }
+				// else
+				// {
+				// 	descriptor_set = new DescriptorSet { renderer, descriptor_set_wrapper };
+
+				// 	descriptor_set_wrapper->vulkan_impl = descriptor_set;
+				// }
+
+				DescriptorSet* descriptor_set { getInstance<DescriptorSet, API::DescriptorSet>(renderer, descriptor_set_wrapper) };
 
 				descr_set_layouts.push_back(descriptor_set->layout);
 			}
