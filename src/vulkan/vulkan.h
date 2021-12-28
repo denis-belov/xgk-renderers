@@ -206,6 +206,7 @@ DECL_PROC(vkCmdCopyBufferToImage);
 DECL_PROC(vkCmdUpdateBuffer);
 DECL_PROC(vkEndCommandBuffer);
 DECL_PROC(vkResetCommandBuffer);
+DECL_PROC(vkCmdCopyImageToBuffer);
 
 DECL_PROC(vkCreateCommandPool);
 DECL_PROC(vkResetCommandPool);
@@ -393,6 +394,7 @@ namespace XGK::VULKAN::WRAPPERS
 		GET_PROC_ADDR(vkCmdCopyBufferToImage);
 		GET_PROC_ADDR(vkEndCommandBuffer);
 		GET_PROC_ADDR(vkResetCommandBuffer);
+		GET_PROC_ADDR(vkCmdCopyImageToBuffer);
 
 		GET_PROC_ADDR(vkCreateCommandPool);
 		GET_PROC_ADDR(vkResetCommandPool);
@@ -1136,88 +1138,93 @@ namespace XGK::VULKAN::WRAPPERS
 			queue_family_props = new VkQueueFamilyProperties[queue_family_prop_count];
 			vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_family_prop_count, queue_family_props);
 
-			vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &surface_format_count, nullptr);
-			surface_formats = new VkSurfaceFormatKHR[surface_format_count];
-			vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &surface_format_count, surface_formats);
+			if (surface != VK_NULL_HANDLE)
+			{
+				vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &surface_format_count, nullptr);
+				surface_formats = new VkSurfaceFormatKHR[surface_format_count];
+				vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface, &surface_format_count, surface_formats);
+
+				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &surface_capabilities);
+			}
 
 			vkGetPhysicalDeviceMemoryProperties(physical_device, &mem_props);
 
-			// for (uint64_t i = 0; i < mem_props.memoryTypeCount; ++i) {
+			for (uint64_t i = 0; i < mem_props.memoryTypeCount; ++i) {
 
-			//   VkMemoryType type = mem_props.memoryTypes[i];
+			  VkMemoryType type = mem_props.memoryTypes[i];
 
-			//   std::cout << "heap index: " << type.heapIndex << std::endl;
+			  std::cout << "heap index: " << type.heapIndex << std::endl;
 
-			//   if (type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT || 0) {
+			  if (type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT || 0) {
 
-			//     std::cout << "  device local" << std::endl;
-			//   }
+			    std::cout << "  device local" << std::endl;
+			  }
 
-			//   if (type.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT || 0) {
+			  if (type.propertyFlags & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT || 0) {
 
-			//     std::cout << "  host visible" << std::endl;
-			//   }
+			    std::cout << "  host visible" << std::endl;
+			  }
 
-			//   if (type.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT || 0) {
+			  if (type.propertyFlags & VK_MEMORY_PROPERTY_HOST_COHERENT_BIT || 0) {
 
-			//     std::cout << "  host coherent" << std::endl;
-			//   }
+			    std::cout << "  host coherent" << std::endl;
+			  }
 
-			//   if (type.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT || 0) {
+			  if (type.propertyFlags & VK_MEMORY_PROPERTY_HOST_CACHED_BIT || 0) {
 
-			//     std::cout << "  host cached" << std::endl;
-			//   }
+			    std::cout << "  host cached" << std::endl;
+			  }
 
-			//   if ((type.propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT || 0)) {
+			  if ((type.propertyFlags & VK_MEMORY_PROPERTY_LAZILY_ALLOCATED_BIT || 0)) {
 
-			//     std::cout << "  lazily allocated" << std::endl;
-			//   }
+			    std::cout << "  lazily allocated" << std::endl;
+			  }
 
-			//   if (type.propertyFlags & VK_MEMORY_PROPERTY_PROTECTED_BIT || 0) {
+			  if (type.propertyFlags & VK_MEMORY_PROPERTY_PROTECTED_BIT || 0) {
 
-			//     std::cout << "  protected" << std::endl;
-			//   }
+			    std::cout << "  protected" << std::endl;
+			  }
 
-			//   if (type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD || 0) {
+			  if (type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_COHERENT_BIT_AMD || 0) {
 
-			//     std::cout << "  device coherent AMD" << std::endl;
-			//   }
+			    std::cout << "  device coherent AMD" << std::endl;
+			  }
 
-			//   if (type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_UNCACHED_BIT_AMD || 0) {
+			  if (type.propertyFlags & VK_MEMORY_PROPERTY_DEVICE_UNCACHED_BIT_AMD || 0) {
 
-			//     std::cout << "  device uncached AMD" << std::endl;
-			//   }
+			    std::cout << "  device uncached AMD" << std::endl;
+			  }
 
-			//   std::cout << std::endl << std::endl;
-			// }
+			  std::cout << std::endl << std::endl;
+			}
 
-			// std::cout << std::endl << std::endl;
+			std::cout << std::endl << std::endl;
 
-			// for (uint64_t i = 0; i < mem_props.memoryHeapCount; ++i) {
+			for (uint64_t i = 0; i < mem_props.memoryHeapCount; ++i) {
 
-			//   VkMemoryHeap heap = mem_props.memoryHeaps[i];
+			  VkMemoryHeap heap = mem_props.memoryHeaps[i];
 
-			//   std::cout << "heap size: " << heap.size << std::endl;
+			  std::cout << "heap size: " << heap.size << std::endl;
 
-			//   if (heap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT || 0) {
+			  if (heap.flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT || 0) {
 
-			//     std::cout << "  device local" << std::endl;
-			//   }
+			    std::cout << "  device local" << std::endl;
+			  }
 
-			//   if (heap.flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT || 0) {
+			  if (heap.flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT || 0) {
 
-			//     std::cout << "  multi instance" << std::endl;
-			//   }
+			    std::cout << "  multi instance" << std::endl;
+			  }
 
-			//   if (heap.flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT_KHR || 0) {
+			  if (heap.flags & VK_MEMORY_HEAP_MULTI_INSTANCE_BIT_KHR || 0) {
 
-			//     std::cout << "  multi instance KHR" << std::endl;
-			//   }
+			    std::cout << "  multi instance KHR" << std::endl;
+			  }
 
-			//   std::cout << std::endl << std::endl;
-			// }
+			  std::cout << std::endl << std::endl;
+			}
 
-			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &surface_capabilities);
+			// vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface, &surface_capabilities);
 
 			// std::cout << surface_capabilities.minImageCount << std::endl;
 			// std::cout << surface_capabilities.maxImageCount << std::endl;
@@ -1233,7 +1240,10 @@ namespace XGK::VULKAN::WRAPPERS
 			{
 				VkBool32 surface_support = VK_FALSE;
 
-				vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, surface, &surface_support);
+				if (surface != VK_NULL_HANDLE)
+				{
+					vkGetPhysicalDeviceSurfaceSupportKHR(physical_device, i, surface, &surface_support);
+				}
 
 				if (queue_family_props[i].queueFlags & VK_QUEUE_GRAPHICS_BIT || 0)
 				{
@@ -2117,10 +2127,6 @@ namespace XGK
 	{
 		struct RendererBase
 		{
-			static std::vector<RendererBase> dynamic_instances;
-
-
-
 			API::Renderer* wrapper {};
 
 			GLFWwindow* window {};
@@ -2132,24 +2138,24 @@ namespace XGK
 
 
 			Instance inst {};
-			VkSurfaceKHR surf { VK_NULL_HANDLE };
+			// VkSurfaceKHR surf { VK_NULL_HANDLE };
 			Device device {};
 			VkQueue graphics_queue { VK_NULL_HANDLE };
-			VkQueue present_queue { VK_NULL_HANDLE };
+			// VkQueue present_queue { VK_NULL_HANDLE };
 
 			VkDescriptorPool descriptor_pool { VK_NULL_HANDLE };
 
-			uint64_t swapchain_image_count {};
+			// uint64_t swapchain_image_count {};
 
-			std::vector<VkFence> submission_completed_fences {};
-			VkSwapchainKHR swapchain { VK_NULL_HANDLE };
+			// std::vector<VkFence> submission_completed_fences {};
+			// VkSwapchainKHR swapchain { VK_NULL_HANDLE };
 			VkRenderPass render_pass { VK_NULL_HANDLE };
 			std::vector<VkFramebuffer> framebuffers {};
-			std::vector<VkSemaphore> image_available_semaphores {};
-			std::vector<VkSemaphore> submission_completed_semaphores {};
-			std::vector<uint32_t> image_indices {};
+			// std::vector<VkSemaphore> image_available_semaphores {};
+			// std::vector<VkSemaphore> submission_completed_semaphores {};
+			// std::vector<uint32_t> image_indices {};
 			std::vector<VkSubmitInfo> submit_i {};
-			std::vector<VkPresentInfoKHR> present_i {};
+			// std::vector<VkPresentInfoKHR> present_i {};
 			std::vector<VkRenderPassBeginInfo> render_pass_bi {};
 			std::vector<VkCommandBuffer> cmd_buffers {};
 			VkClearValue clear_value [2] { {}, {} };
@@ -2160,6 +2166,8 @@ namespace XGK
 			// // VkPipelineLayout ppl_layout2 { VK_NULL_HANDLE };
 			// VkPipeline ppl2 { VK_NULL_HANDLE };
 			// VkBuffer vertex_buffer { VK_NULL_HANDLE };
+
+			// TODO: remove
 			uint32_t curr_image {};
 
 
@@ -2175,6 +2183,41 @@ namespace XGK
 			Renderer (API::Renderer*);
 
 
+			VkSurfaceKHR surf { VK_NULL_HANDLE };
+			VkQueue present_queue { VK_NULL_HANDLE };
+
+			uint64_t swapchain_image_count {};
+
+			std::vector<VkFence> submission_completed_fences {};
+			VkSwapchainKHR swapchain { VK_NULL_HANDLE };
+
+			std::vector<VkSemaphore> image_available_semaphores {};
+			std::vector<VkSemaphore> submission_completed_semaphores {};
+			std::vector<uint32_t> image_indices {};
+
+			std::vector<VkPresentInfoKHR> present_i {};
+
+			// uint32_t curr_image {};
+
+
+
+			virtual void endLoop (void) override;
+			virtual void destroy (void) override;
+		};
+
+
+
+		struct RendererOffscreen : public RendererBase
+		{
+			RendererOffscreen (API::Renderer*);
+
+
+
+			std::vector<VkImage> render_images {};
+			VkBuffer pixel_buffer { VK_NULL_HANDLE };
+			void* pixel_data {};
+
+
 
 			virtual void endLoop (void) override;
 			virtual void destroy (void) override;
@@ -2184,7 +2227,6 @@ namespace XGK
 
 		struct Uniform
 		{
-			static std::vector<Uniform> dynamic_instances;
 			// uniform_update_t functions
 			// static void uniformMatrix4fv (Uniform*);
 
@@ -2211,10 +2253,6 @@ namespace XGK
 
 		struct UniformBlock
 		{
-			static std::vector<UniformBlock> dynamic_instances;
-
-
-
 			RendererBase* renderer {};
 			API::UniformBlock* wrapper {};
 
@@ -2254,10 +2292,6 @@ namespace XGK
 
 		struct DescriptorSet
 		{
-			static std::vector<DescriptorSet> dynamic_instances;
-
-
-
 			RendererBase* renderer {};
 			API::DescriptorSet* wrapper {};
 
@@ -2285,8 +2319,6 @@ namespace XGK
 
 		struct Material
 		{
-			static std::vector<Material> dynamic_instances;
-
 			static Material* used_instance;
 
 			// VK_PRIMITIVE_TOPOLOGY_POINT_LIST = 0,
@@ -2330,10 +2362,6 @@ namespace XGK
 
 		struct Object
 		{
-			static std::vector<Object> dynamic_instances;
-
-
-
 			RendererBase* renderer {};
 			API::Object* wrapper {};
 
@@ -2350,10 +2378,6 @@ namespace XGK
 
 		struct Scene
 		{
-			static std::vector<Scene> dynamic_instances;
-
-
-
 			RendererBase* renderer {};
 			API::Scene* wrapper {};
 
@@ -2384,6 +2408,10 @@ namespace XGK
 		}
 	}
 }
+
+
+
+#define XGK_VULKAN_GET_INSTANCE(type, renderer, wrapper) XGK::VULKAN::getInstance<XGK::VULKAN:: type, XGK::API:: type>(renderer, wrapper)
 
 
 

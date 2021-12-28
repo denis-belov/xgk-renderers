@@ -6,8 +6,7 @@
 // size_t
 #include <cstddef>
 
-#include "glad/glad.h"
-
+#include "xgk-renderers/src/glad/include/glad/glad.h"
 #include "xgk-renderers/src/glfw/glfw-3.3.5/include/GLFW/glfw3.h"
 
 #include "xgk-api/src/renderer/renderer.h"
@@ -197,29 +196,12 @@ namespace XGK
 
 			return instance;
 		}
-
-		// template <class T>
-		// T* getInstance (RendererBase* renderer, void* _wrapper)
-		// {
-		// 	API::T* wrapper = static_cast<API::T*>(_wrapper);
-
-		// 	T* instance {};
-
-		// 	if (wrapper->opengl_impl)
-		// 	{
-		// 		instance = static_cast<T*>(wrapper->opengl_impl);
-		// 	}
-		// 	else
-		// 	{
-		// 		instance = new T { renderer, wrapper };
-
-		// 		wrapper->opengl_impl = instance;
-		// 	}
-
-		// 	return instance;
-		// }
 	}
 }
+
+
+
+#define XGK_OPENGL_GET_INSTANCE(type, renderer, wrapper) XGK::OPENGL::getInstance<XGK::OPENGL:: type, XGK::API:: type>(renderer, wrapper)
 
 
 

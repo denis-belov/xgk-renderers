@@ -116,6 +116,7 @@ DECL_PROC(vkCmdCopyBufferToImage);
 DECL_PROC(vkCmdUpdateBuffer);
 DECL_PROC(vkEndCommandBuffer);
 DECL_PROC(vkResetCommandBuffer);
+DECL_PROC(vkCmdCopyImageToBuffer);
 
 DECL_PROC(vkCreateCommandPool);
 DECL_PROC(vkResetCommandPool);
@@ -171,55 +172,55 @@ namespace XGK::VULKAN::WRAPPERS
 
 
 
-	#ifdef DEBUG
-		#define DEBUG_REPORT_ARGS \
-			\
-			VkDebugReportFlagsEXT      flags,\
-			VkDebugReportObjectTypeEXT objectType,\
-			uint64_t                   object,\
-			size_t                     location,\
-			int32_t                    messageCode,\
-			const char*                pLayerPrefix,\
-			const char*                pMessage,\
-			void*                      pUserData
+	// #ifdef DEBUG
+	// 	#define DEBUG_REPORT_ARGS \
+	// 		\
+	// 		VkDebugReportFlagsEXT      flags,\
+	// 		VkDebugReportObjectTypeEXT objectType,\
+	// 		uint64_t                   object,\
+	// 		size_t                     location,\
+	// 		int32_t                    messageCode,\
+	// 		const char*                pLayerPrefix,\
+	// 		const char*                pMessage,\
+	// 		void*                      pUserData
 
-		VkBool32 reportError(DEBUG_REPORT_ARGS)
-		{
-			printf("VALIDATION LAYER ERROR: %s\n", pMessage);
+	// 	VkBool32 reportError(DEBUG_REPORT_ARGS)
+	// 	{
+	// 		printf("VALIDATION LAYER ERROR: %s\n", pMessage);
 
-			return VK_FALSE;
-		}
+	// 		return VK_FALSE;
+	// 	}
 
-		VkBool32 reportInfo(DEBUG_REPORT_ARGS)
-		{
-			printf("VALIDATION LAYER INFORMATION: %s\n", pMessage);
+	// 	VkBool32 reportInfo(DEBUG_REPORT_ARGS)
+	// 	{
+	// 		printf("VALIDATION LAYER INFORMATION: %s\n", pMessage);
 
-			return VK_FALSE;
-		}
+	// 		return VK_FALSE;
+	// 	}
 
-		VkBool32 reportWarn(DEBUG_REPORT_ARGS)
-		{
-			printf("VALIDATION LAYER WARNING: %s\n", pMessage);
+	// 	VkBool32 reportWarn(DEBUG_REPORT_ARGS)
+	// 	{
+	// 		printf("VALIDATION LAYER WARNING: %s\n", pMessage);
 
-			return VK_FALSE;
-		}
+	// 		return VK_FALSE;
+	// 	}
 
-		VkBool32 reportPerf(DEBUG_REPORT_ARGS)
-		{
-			printf("VALIDATION LAYER PERFORMANCE WARNING: %s\n", pMessage);
+	// 	VkBool32 reportPerf(DEBUG_REPORT_ARGS)
+	// 	{
+	// 		printf("VALIDATION LAYER PERFORMANCE WARNING: %s\n", pMessage);
 
-			return VK_FALSE;
-		}
+	// 		return VK_FALSE;
+	// 	}
 
-		VkBool32 reportDebug(DEBUG_REPORT_ARGS)
-		{
-			printf("VALIDATION LAYER DEBUG: %s\n", pMessage);
+	// 	VkBool32 reportDebug(DEBUG_REPORT_ARGS)
+	// 	{
+	// 		printf("VALIDATION LAYER DEBUG: %s\n", pMessage);
 
-			return VK_FALSE;
-		}
+	// 		return VK_FALSE;
+	// 	}
 
-		#undef DEBUG_REPORT_ARGS
-	#endif
+	// 	#undef DEBUG_REPORT_ARGS
+	// #endif
 }
 
 
@@ -612,6 +613,255 @@ namespace XGK
 			glfwDestroyWindow(window);
 
 			glfwTerminate();
+		}
+
+
+
+		RendererOffscreen::RendererOffscreen (API::Renderer* _wrapper) : RendererBase(_wrapper)
+		{
+			VkApplicationInfo app_i { AppI() };
+
+			inst.create(&app_i, 0, nullptr, 0, nullptr);
+
+			VkPhysicalDevice physical_device { inst.physical_devices[1] };
+
+			device.getProps(physical_device, VK_NULL_HANDLE);
+
+			static const float queue_priorities { 1.0f };
+
+			std::vector<VkDeviceQueueCreateInfo> queue_ci { DevQueueCI(device.graphics_queue_family_index, 1, &queue_priorities) };
+
+			device.create(physical_device, 1, queue_ci.data(), 0, nullptr, 0, nullptr);
+
+			graphics_queue = device.Queue(device.graphics_queue_family_index, 0);
+
+
+
+			VkAttachmentDescription render_pass_attach []
+			{
+				// color
+				{
+					0,
+					VK_FORMAT_B8G8R8A8_UNORM,
+					VK_SAMPLE_COUNT_1_BIT,
+					VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_STORE,
+					VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_DONT_CARE,
+					VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
+				},
+
+				// depth
+				{
+					0,
+					VK_FORMAT_D32_SFLOAT,
+					VK_SAMPLE_COUNT_1_BIT,
+					VK_ATTACHMENT_LOAD_OP_CLEAR, VK_ATTACHMENT_STORE_OP_DONT_CARE,
+					VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_DONT_CARE,
+					VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+				},
+
+				// // color_resolve
+				// {
+				//   0,
+				//   VK_FORMAT_B8G8R8A8_UNORM,
+				//   VK_SAMPLE_COUNT_1_BIT,
+				//   VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_STORE,
+				//   VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_DONT_CARE,
+				//   VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR
+				// },
+			};
+
+			// object accessed by subpass
+			VkAttachmentReference color_attach_ref { 0, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+			VkAttachmentReference depth_attach_ref { 1, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL };
+			// VkAttachmentReference color_attach_resolve_ref = { 2, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL };
+
+			VkSubpassDescription subpass_desc
+			{
+				0, VK_PIPELINE_BIND_POINT_GRAPHICS,
+				0, nullptr,
+				// 1, &color_attach_ref, &color_attach_resolve_ref, &depth_attach_ref
+				1, &color_attach_ref, nullptr, &depth_attach_ref
+			};
+
+			VkSubpassDependency subpass_dep
+			{
+				VK_SUBPASS_EXTERNAL, 0,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				0, VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+			};
+
+			render_pass =
+				device.RenderPass
+				(
+					// 3, render_pass_attach,
+					2, render_pass_attach,
+					1, &subpass_desc,
+					1, &subpass_dep
+				);
+
+
+
+			const uint32_t qfi [] { device.graphics_queue_family_index, device.present_queue_family_index };
+
+			uint64_t image_count { 1 };
+
+			std::vector<VkImageView> swapchain_image_views(image_count);
+			render_images.resize(image_count);
+			VkMemoryRequirements render_image_mem_reqs {};
+			uint64_t render_image_dev_local_mem_index {};
+			std::vector<VkDeviceMemory> render_image_mems(image_count);
+			std::vector<VkImageView> render_image_views(image_count);
+			framebuffers.resize(image_count);
+
+			std::vector<VkImage> depth_images(image_count);
+			std::vector<VkImageView> depth_image_views(image_count);
+			VkMemoryRequirements depth_image_mem_reqs {};
+			uint64_t depth_image_dev_local_mem_index {};
+			std::vector<VkDeviceMemory> depth_image_mems(image_count);
+
+			for (uint64_t i = 0; i < image_count; ++i)
+			{
+				render_images[i] = device.Image
+				(
+					VK_IMAGE_TYPE_2D,
+					VK_FORMAT_B8G8R8A8_UNORM,
+					800, 600, 1,
+					1,
+					1,
+					VK_SAMPLE_COUNT_1_BIT,
+					VK_IMAGE_TILING_OPTIMAL,
+					VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+					VK_SHARING_MODE_EXCLUSIVE,
+					0, nullptr,
+					VK_IMAGE_LAYOUT_UNDEFINED
+				);
+
+				render_image_mem_reqs = device.MemReqs(render_images[i]);
+
+				render_image_dev_local_mem_index = device.getMemTypeIndex(&render_image_mem_reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+				render_image_mems[i] = device.Mem(render_image_mem_reqs.size, render_image_dev_local_mem_index);
+
+				device.bindMem(render_images[i], render_image_mems[i]);
+
+				{
+					pixel_buffer = device.Buffer(render_image_mem_reqs.size, VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_SHARING_MODE_EXCLUSIVE);
+
+					VkMemoryRequirements vertex_buffer_mem_reqs { device.MemReqs(pixel_buffer) };
+
+					uint64_t vertex_buffer_mem_index { device.getMemTypeIndex(&vertex_buffer_mem_reqs, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) };
+
+					VkDeviceMemory vertex_buffer_mem { device.Mem(vertex_buffer_mem_reqs.size, vertex_buffer_mem_index) };
+
+					device.bindMem(pixel_buffer, vertex_buffer_mem);
+
+					pixel_data = device.mapMem(vertex_buffer_mem, 0, render_image_mem_reqs.size, 0);
+				}
+
+				render_image_views[i] = device.ImageView
+				(
+					render_images[i],
+					VK_IMAGE_VIEW_TYPE_2D,
+					VK_FORMAT_B8G8R8A8_UNORM,
+					VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY,
+					VK_IMAGE_ASPECT_COLOR_BIT,
+					0, 1,
+					0, 1
+				);
+
+
+
+				depth_images[i] = device.Image
+				(
+					VK_IMAGE_TYPE_2D,
+					VK_FORMAT_D32_SFLOAT,
+					800, 600, 1,
+					1,
+					1,
+					VK_SAMPLE_COUNT_1_BIT,
+					VK_IMAGE_TILING_OPTIMAL,
+					VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+					VK_SHARING_MODE_EXCLUSIVE,
+					0, nullptr,
+					VK_IMAGE_LAYOUT_UNDEFINED
+				);
+
+				if (!i)
+				{
+					depth_image_mem_reqs = device.MemReqs(depth_images[i]);
+
+					depth_image_dev_local_mem_index = device.getMemTypeIndex(&depth_image_mem_reqs, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+				}
+
+				depth_image_mems[i] = device.Mem(depth_image_mem_reqs.size, depth_image_dev_local_mem_index);
+
+				device.bindMem(depth_images[i], depth_image_mems[i]);
+
+				depth_image_views[i] = device.ImageView
+				(
+					depth_images[i],
+					VK_IMAGE_VIEW_TYPE_2D,
+					VK_FORMAT_D32_SFLOAT,
+					VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY, VK_COMPONENT_SWIZZLE_IDENTITY,
+					VK_IMAGE_ASPECT_DEPTH_BIT,
+					0, 1,
+					0, 1
+				);
+
+
+
+				VkImageView framebuffer_attach [] { render_image_views[i], depth_image_views[i] };
+
+				framebuffers[i] = device.Framebuffer
+				(
+					render_pass,
+					2, framebuffer_attach,
+					800, 600,
+					1
+				);
+			}
+
+
+
+			VkCommandPool cmd_pool { device.CmdPool(device.graphics_queue_family_index, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT) };
+
+			cmd_buffers = device.CmdBuffer(cmd_pool, VK_COMMAND_BUFFER_LEVEL_PRIMARY, image_count);
+
+
+
+			clear_value[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+			clear_value[1].depthStencil = { 1.0f, 0 };
+
+			submit_i.resize(image_count);
+			render_pass_bi.resize(image_count);
+
+			static const VkPipelineStageFlags wait_stages { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+
+			for (uint64_t i = 0; i < image_count; ++i)
+			{
+				submit_i[i] =
+					SubmitI
+					(
+						0, nullptr, nullptr,
+						1, &cmd_buffers[i],
+						0, nullptr
+					);
+
+				render_pass_bi[i] = RenderPassBeginI(render_pass, framebuffers[i], { 0, 0, 800, 600 }, 2, clear_value);
+			}
+		}
+
+		void RendererOffscreen::endLoop (void)
+		{
+		}
+
+		void RendererOffscreen::destroy (void)
+		{
+			vkDeviceWaitIdle(device.handle);
+
+			device.destroy();
+
+			inst.destroy();
 		}
 
 
