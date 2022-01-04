@@ -166,6 +166,100 @@ DECL_PROC(vkDestroyDescriptorSetLayout);
 
 
 
+std::vector<uint32_t> QWE (const char* glsl_code, glslang_stage_t stage)
+{
+	const char* shaderCodeVertex = glsl_code;
+
+	cout << shaderCodeVertex << endl;
+
+	glslang_resource_t resource
+	{
+		.max_draw_buffers = 1,
+	};
+
+	const glslang_input_t input
+	{
+			.language = GLSLANG_SOURCE_GLSL,
+			.stage = stage,
+			.client = GLSLANG_CLIENT_VULKAN,
+			.client_version = GLSLANG_TARGET_VULKAN_1_2,
+			.target_language = GLSLANG_TARGET_SPV,
+			.target_language_version = GLSLANG_TARGET_SPV_1_3,
+			.code = shaderCodeVertex,
+			.default_version = 100,
+			.default_profile = GLSLANG_NO_PROFILE,
+			.force_default_version_and_profile = false,
+			.forward_compatible = false,
+			.messages = GLSLANG_MSG_DEFAULT_BIT,
+			.resource = &resource,
+	};
+
+	cout << 123 << endl;
+
+	glslang_initialize_process();
+
+	cout << 222 << endl;
+
+	glslang_shader_t* shader = glslang_shader_create( &input );
+
+	cout << 444 << endl;
+
+	if ( !glslang_shader_preprocess(shader, &input) )
+	{
+			// use glslang_shader_get_info_log() and glslang_shader_get_info_debug_log()
+		cout << glslang_shader_get_info_log(shader) << endl;
+		cout << glslang_shader_get_info_debug_log(shader) << endl;
+	}
+
+	if ( !glslang_shader_parse(shader, &input) )
+	{
+			// use glslang_shader_get_info_log() and glslang_shader_get_info_debug_log()
+		cout << glslang_shader_get_info_log(shader) << endl;
+		cout << glslang_shader_get_info_debug_log(shader) << endl;
+	}
+
+	cout << 555 << endl;
+
+	glslang_program_t* program = glslang_program_create();
+	cout << 777 << endl;
+	glslang_program_add_shader( program, shader );
+	cout << 888 << endl;
+
+	if (!glslang_program_link(program, GLSLANG_MSG_SPV_RULES_BIT | GLSLANG_MSG_VULKAN_RULES_BIT))
+	{
+			// use glslang_program_get_info_log() and glslang_program_get_info_debug_log();
+
+		cout << glslang_program_get_info_log(program) << endl;
+		cout << glslang_program_get_info_debug_log(program) << endl;
+	}
+
+	cout << 999 << endl;
+
+	glslang_program_SPIRV_generate( program, input.stage );
+
+	cout << 9991 << endl;
+
+	if ( glslang_program_SPIRV_get_messages(program) )
+	{
+			printf("%s", glslang_program_SPIRV_get_messages(program));
+	}
+
+	// .codeSize = glslang_program_SPIRV_get_size(program) * sizeof(unsigned int),
+	// .pCode    = glslang_program_SPIRV_get_ptr(program),
+
+	glslang_shader_delete( shader );
+
+	cout << glslang_program_SPIRV_get_size(program) << endl;
+
+	std::vector<uint32_t> result(glslang_program_SPIRV_get_size(program));
+
+	memcpy(result.data(), glslang_program_SPIRV_get_ptr(program), glslang_program_SPIRV_get_size(program) * sizeof(uint32_t));
+
+	return result;
+}
+
+
+
 namespace XGK::VULKAN::WRAPPERS
 {
 	SHARED_LIBRARY_MODULE_TYPE shared_library_module_handle {};

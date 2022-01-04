@@ -25,6 +25,8 @@
 #define VK_NO_PROTOTYPES
 #include "vulkan/vulkan.h"
 
+#include "glslang_c_interface.h"
+
 // #include "xgk-vulkan/src/wrappers.h"
 
 #include "xgk-api/src/renderer/renderer.h"
@@ -253,6 +255,10 @@ DECL_PROC(vkAllocateDescriptorSets);
 DECL_PROC(vkDestroyDescriptorSetLayout);
 
 #undef DECL_PROC
+
+
+
+std::vector<uint32_t> QWE (const char*, glslang_stage_t = GLSLANG_STAGE_VERTEX);
 
 
 
