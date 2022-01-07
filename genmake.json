@@ -10,25 +10,6 @@
 
 	"entries":
 	{
-		"QWE":
-		[
-			"$(SRC)/glslang/lib/libglslang.$(LIB_EXT)",
-			"$(SRC)/glslang/lib/libglslang-default-resource-limits.$(LIB_EXT)",
-
-			"$(SRC)/glslang/lib/libHLSL.$(LIB_EXT)",
-
-			"$(SRC)/glslang/lib/libSPIRV.$(LIB_EXT)",
-			"$(SRC)/glslang/lib/libSPIRV-Tools-opt.$(LIB_EXT)",
-			"$(SRC)/glslang/lib/libSPIRV-Tools.$(LIB_EXT)",
-			"$(SRC)/glslang/lib/libSPVRemapper.$(LIB_EXT)",
-
-			"$(SRC)/glslang/lib/libMachineIndependent.$(LIB_EXT)",
-			"$(SRC)/glslang/lib/libOSDependent.$(LIB_EXT)",
-			"$(SRC)/glslang/lib/libOGLCompiler.$(LIB_EXT)",
-
-			"$(SRC)/glslang/lib/libGenericCodeGen.$(LIB_EXT)"
-		],
-
 		"type": "static",
 
 		"name": "xgk-renderers",
