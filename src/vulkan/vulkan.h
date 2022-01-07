@@ -25,7 +25,7 @@
 #define VK_NO_PROTOTYPES
 #include "vulkan/vulkan.h"
 
-#include "glslang_c_interface.h"
+#include "glslang/Include/glslang_c_interface.h"
 
 // #include "xgk-vulkan/src/wrappers.h"
 
@@ -258,7 +258,8 @@ DECL_PROC(vkDestroyDescriptorSetLayout);
 
 
 
-std::vector<uint32_t> QWE (const char*, glslang_stage_t = GLSLANG_STAGE_VERTEX);
+std::vector<uint32_t> QWE (const char*, glslang_stage_t);
+// std::vector<uint32_t> (* QWE) (const char*, glslang_stage_t);
 
 
 
@@ -2323,6 +2324,15 @@ namespace XGK
 
 
 
+		namespace MATERIAL
+		{
+			enum class ShaderUsage : size_t
+			{
+				SPIRV,
+				GLSL_VULKAN,
+			};
+		}
+
 		struct Material
 		{
 			static Material* used_instance;
@@ -2357,7 +2367,7 @@ namespace XGK
 
 
 
-			Material (RendererBase*, API::Material*);
+			Material (RendererBase*, API::Material*, const MATERIAL::ShaderUsage = MATERIAL::ShaderUsage::GLSL_VULKAN);
 
 
 

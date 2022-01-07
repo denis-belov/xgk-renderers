@@ -319,8 +319,9 @@ namespace XGK::VULKAN::WRAPPERS
 
 
 
-#undef SHARED_LIBRARY_MODULE_TYPE
+SHARED_LIBRARY_MODULE_TYPE shared_library_module_handle2 {};
 
+#undef SHARED_LIBRARY_MODULE_TYPE
 
 
 
@@ -337,6 +338,10 @@ namespace XGK
 
 		Renderer::Renderer (API::Renderer* _wrapper) : RendererBase(_wrapper)
 		{
+			// QWE = (std::vector<uint32_t> (*) (const char*, glslang_stage_t)) SHARED_LIBRARY_LOAD_FUNCTION(shared_library_module_handle2, "QWE");
+
+
+
 			glfwInit();
 
 			glfwDefaultWindowHints();
@@ -1160,7 +1165,7 @@ namespace XGK
 			VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
 		};
 
-		Material::Material (RendererBase* _renderer, API::Material* _wrapper)
+		Material::Material (RendererBase* _renderer, API::Material* _wrapper, const MATERIAL::ShaderUsage shader_usage)
 		{
 			renderer = _renderer;
 			wrapper = _wrapper;
@@ -1229,11 +1234,31 @@ namespace XGK
 
 
 
-			VkPipelineShaderStageCreateInfo ppl_stages []
+			VkPipelineShaderStageCreateInfo ppl_stages [2] {};
+
+			switch (shader_usage)
 			{
-				PplShader(VK_SHADER_STAGE_VERTEX_BIT, renderer->device.Shader(wrapper->spirv_code_vertex.size() * sizeof(uint32_t), wrapper->spirv_code_vertex.data())),
-				PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, renderer->device.Shader(wrapper->spirv_code_fragment.size() * sizeof(uint32_t), wrapper->spirv_code_fragment.data()))
-			};
+				case MATERIAL::ShaderUsage::SPIRV:
+				{
+					ppl_stages[0] = PplShader(VK_SHADER_STAGE_VERTEX_BIT, renderer->device.Shader(wrapper->spirv_code_vertex.size() * sizeof(uint32_t), wrapper->spirv_code_vertex.data()));
+					ppl_stages[1] = PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, renderer->device.Shader(wrapper->spirv_code_fragment.size() * sizeof(uint32_t), wrapper->spirv_code_fragment.data()));
+
+					break;
+				}
+
+				case MATERIAL::ShaderUsage::GLSL_VULKAN:
+				{
+					std::vector<uint32_t> spirv_code_vertex = QWE(wrapper->glsl_vulkan_code_vertex.c_str(), GLSLANG_STAGE_VERTEX);
+					std::vector<uint32_t> spirv_code_fragment = QWE(wrapper->glsl_vulkan_code_fragment.c_str(), GLSLANG_STAGE_FRAGMENT);
+
+					ppl_stages[0] = PplShader(VK_SHADER_STAGE_VERTEX_BIT, renderer->device.Shader(spirv_code_vertex.size() * sizeof(uint32_t), spirv_code_vertex.data()));
+					ppl_stages[1] = PplShader(VK_SHADER_STAGE_FRAGMENT_BIT, renderer->device.Shader(spirv_code_fragment.size() * sizeof(uint32_t), spirv_code_fragment.data()));
+
+					break;
+				}
+
+				default: break;
+			}
 
 			VkVertexInputBindingDescription vertex_binding { 0, 12, VK_VERTEX_INPUT_RATE_VERTEX };
 			VkVertexInputAttributeDescription vertex_attr { 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 };
