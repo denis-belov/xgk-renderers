@@ -2350,12 +2350,17 @@ namespace XGK
 			// VK_PRIMITIVE_TOPOLOGY_PATCH_LIST = 10,
 			static const VkPrimitiveTopology TOPOLOGY [3];
 
+			// VK_FRONT_FACE_COUNTER_CLOCKWISE = 0,
+			// VK_FRONT_FACE_CLOCKWISE = 1,
+			static const VkFrontFace FRONT_FACE [2];
+
 
 
 			RendererBase* renderer {};
 			API::Material* wrapper {};
 
 			VkPrimitiveTopology topology {};
+			VkFrontFace front_face {};
 
 			VkPipelineLayout ppl_layout {};
 			VkPipeline ppl {};

@@ -161,19 +161,6 @@ namespace XGK
 
 			for (API::Uniform* uniform_wrapper : wrapper->uniforms)
 			{
-				// Uniform* uniform {};
-
-				// if (uniform_wrapper->opengl_impl)
-				// {
-				// 	uniform = static_cast<Uniform*>(uniform_wrapper->opengl_impl);
-				// }
-				// else
-				// {
-				// 	uniform = new Uniform { renderer, uniform_wrapper };
-
-				// 	uniform_wrapper->opengl_impl = uniform;
-				// }
-
 				Uniform* uniform { getInstance<Uniform, API::Uniform>(renderer, uniform_wrapper) };
 
 				uniforms.push_back(uniform);
@@ -222,6 +209,12 @@ namespace XGK
 			GL_LINES,
 		};
 
+		const GLenum Material::FRONT_FACE [2]
+		{
+			GL_CCW,
+			GL_CW,
+		};
+
 		Material::Material (RendererBase* _renderer, API::Material* _wrapper)
 		{
 			renderer = _renderer;
@@ -231,6 +224,7 @@ namespace XGK
 
 			// Why is not wrapper->topology an integer?
 			topology = Material::TOPOLOGY[static_cast<size_t>(wrapper->topology)];
+			front_face = Material::FRONT_FACE[static_cast<size_t>(wrapper->front_face)];
 
 
 
@@ -316,19 +310,6 @@ namespace XGK
 
 			for (API::Uniform* uniform_wrapper : wrapper->uniforms)
 			{
-				// Uniform* uniform {};
-
-				// if (uniform_wrapper->opengl_impl)
-				// {
-				// 	uniform = static_cast<Uniform*>(uniform_wrapper->opengl_impl);
-				// }
-				// else
-				// {
-				// 	uniform = new Uniform { renderer, uniform_wrapper };
-
-				// 	uniform_wrapper->opengl_impl = uniform;
-				// }
-
 				Uniform* uniform { getInstance<Uniform, API::Uniform>(renderer, uniform_wrapper) };
 
 				uniform->location = glGetUniformLocation(program, (const GLchar*) uniform_wrapper->name.c_str());
@@ -345,19 +326,6 @@ namespace XGK
 
 			for (API::UniformBlock* uniform_block_wrapper : wrapper->uniform_blocks)
 			{
-				// UniformBlock* uniform_block {};
-
-				// if (uniform_block_wrapper->opengl_impl)
-				// {
-				// 	uniform_block = static_cast<UniformBlock*>(uniform_block_wrapper->opengl_impl);
-				// }
-				// else
-				// {
-				// 	uniform_block = new UniformBlock { renderer, uniform_block_wrapper };
-
-				// 	uniform_block_wrapper->opengl_impl = uniform_block;
-				// }
-
 				UniformBlock* uniform_block { getInstance<UniformBlock, API::UniformBlock>(renderer, uniform_block_wrapper) };
 
 				glUniformBlockBinding
@@ -380,6 +348,7 @@ namespace XGK
 		{
 			Material::used_instance = this;
 
+			glFrontFace(front_face);
 			glUseProgram(program);
 
 			// for (size_t i {}; i < uniforms.size(); ++i)

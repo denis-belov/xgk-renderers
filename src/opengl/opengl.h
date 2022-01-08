@@ -126,6 +126,7 @@ namespace XGK
 			static Material* used_instance;
 
 			static const GLenum TOPOLOGY [3];
+			static const GLenum FRONT_FACE [3];
 
 
 
@@ -133,6 +134,7 @@ namespace XGK
 			API::Material* wrapper {};
 
 			GLenum topology {};
+			GLenum front_face {};
 
 			GLuint program {};
 

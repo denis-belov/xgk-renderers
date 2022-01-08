@@ -170,8 +170,6 @@ std::vector<uint32_t> QWE (const char* glsl_code, glslang_stage_t stage)
 {
 	const char* shaderCodeVertex = glsl_code;
 
-	cout << shaderCodeVertex << endl;
-
 	glslang_resource_t resource
 	{
 		.max_draw_buffers = 1,
@@ -194,15 +192,9 @@ std::vector<uint32_t> QWE (const char* glsl_code, glslang_stage_t stage)
 			.resource = &resource,
 	};
 
-	cout << 123 << endl;
-
 	glslang_initialize_process();
 
-	cout << 222 << endl;
-
 	glslang_shader_t* shader = glslang_shader_create( &input );
-
-	cout << 444 << endl;
 
 	if ( !glslang_shader_preprocess(shader, &input) )
 	{
@@ -218,12 +210,8 @@ std::vector<uint32_t> QWE (const char* glsl_code, glslang_stage_t stage)
 		cout << glslang_shader_get_info_debug_log(shader) << endl;
 	}
 
-	cout << 555 << endl;
-
 	glslang_program_t* program = glslang_program_create();
-	cout << 777 << endl;
 	glslang_program_add_shader( program, shader );
-	cout << 888 << endl;
 
 	if (!glslang_program_link(program, GLSLANG_MSG_SPV_RULES_BIT | GLSLANG_MSG_VULKAN_RULES_BIT))
 	{
@@ -233,11 +221,7 @@ std::vector<uint32_t> QWE (const char* glsl_code, glslang_stage_t stage)
 		cout << glslang_program_get_info_debug_log(program) << endl;
 	}
 
-	cout << 999 << endl;
-
 	glslang_program_SPIRV_generate( program, input.stage );
-
-	cout << 9991 << endl;
 
 	if ( glslang_program_SPIRV_get_messages(program) )
 	{
@@ -248,8 +232,6 @@ std::vector<uint32_t> QWE (const char* glsl_code, glslang_stage_t stage)
 	// .pCode    = glslang_program_SPIRV_get_ptr(program),
 
 	glslang_shader_delete( shader );
-
-	cout << glslang_program_SPIRV_get_size(program) << endl;
 
 	std::vector<uint32_t> result(glslang_program_SPIRV_get_size(program));
 
@@ -1165,6 +1147,12 @@ namespace XGK
 			VK_PRIMITIVE_TOPOLOGY_LINE_LIST,
 		};
 
+		const VkFrontFace Material::FRONT_FACE [2]
+		{
+			VK_FRONT_FACE_COUNTER_CLOCKWISE,
+			VK_FRONT_FACE_CLOCKWISE,
+		};
+
 		Material::Material (RendererBase* _renderer, API::Material* _wrapper, const MATERIAL::ShaderUsage shader_usage)
 		{
 			renderer = _renderer;
@@ -1173,6 +1161,7 @@ namespace XGK
 
 
 			topology = Material::TOPOLOGY[static_cast<size_t>(wrapper->topology)];
+			front_face = Material::FRONT_FACE[static_cast<size_t>(wrapper->front_face)];
 
 
 
@@ -1189,7 +1178,7 @@ namespace XGK
 
 			VkPipelineMultisampleStateCreateInfo default_ppl_sample { PplSample(VK_SAMPLE_COUNT_1_BIT, VK_FALSE, 0.0f, nullptr, VK_FALSE, VK_FALSE) };
 
-			VkPipelineRasterizationStateCreateInfo default_ppl_rast { PplRast(VK_FALSE, VK_FALSE, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE, VK_FALSE, 0.0f, 0.0f, 0.0f, 1.0f) };
+			VkPipelineRasterizationStateCreateInfo default_ppl_rast { PplRast(VK_FALSE, VK_FALSE, VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, front_face, VK_FALSE, 0.0f, 0.0f, 0.0f, 1.0f) };
 
 			VkStencilOpState default_ppl_stenc { VK_STENCIL_OP_KEEP, VK_STENCIL_OP_KEEP, VK_STENCIL_OP_KEEP, VK_COMPARE_OP_ALWAYS, 0, 0, 0 };
 
@@ -1271,19 +1260,6 @@ namespace XGK
 
 			for (API::DescriptorSet* descriptor_set_wrapper : wrapper->descriptor_sets)
 			{
-				// DescriptorSet* descriptor_set {};
-
-				// if (descriptor_set_wrapper->vulkan_impl)
-				// {
-				// 	descriptor_set = static_cast<DescriptorSet*>(descriptor_set_wrapper->vulkan_impl);
-				// }
-				// else
-				// {
-				// 	descriptor_set = new DescriptorSet { renderer, descriptor_set_wrapper };
-
-				// 	descriptor_set_wrapper->vulkan_impl = descriptor_set;
-				// }
-
 				DescriptorSet* descriptor_set { getInstance<DescriptorSet, API::DescriptorSet>(renderer, descriptor_set_wrapper) };
 
 				descr_set_layouts.push_back(descriptor_set->layout);
