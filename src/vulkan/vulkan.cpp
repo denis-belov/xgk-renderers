@@ -313,6 +313,8 @@ namespace XGK
 	{
 		RendererBase::RendererBase (API::Renderer* _wrapper)
 		{
+			type = XGK::RENDERERS::RendererType::VULKAN;
+
 			wrapper = _wrapper;
 		}
 

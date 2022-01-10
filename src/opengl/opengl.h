@@ -8,8 +8,9 @@
 
 #include "xgk-renderers/src/glad/include/glad/glad.h"
 #include "xgk-renderers/src/glfw/glfw-3.3.5/include/GLFW/glfw3.h"
+#include "xgk-renderers/src/base/renderer.h"
 
-#include "xgk-api/src/renderer/renderer.h"
+// #include "xgk-api/src/renderer/renderer.h"
 #include "xgk-api/src/uniform/uniform.h"
 #include "xgk-api/src/uniform-block/uniform-block.h"
 #include "xgk-api/src/material/material.h"
@@ -22,9 +23,9 @@ namespace XGK
 {
 	namespace OPENGL
 	{
-		struct RendererBase
+		struct RendererBase : public XGK::RENDERERS::Renderer
 		{
-			API::Renderer* wrapper {};
+			// API::Renderer* wrapper {};
 
 			GLFWwindow* window {};
 
@@ -34,7 +35,7 @@ namespace XGK
 
 
 
-			virtual void endLoop (void) = 0;
+			// virtual void endLoop (void) = 0;
 		};
 
 
@@ -46,13 +47,14 @@ namespace XGK
 
 
 			virtual void endLoop (void) override;
+			virtual void destroy (void) override;
 		};
 
 
 
 		struct RendererOffscreen : public RendererBase
 		{
-			void* pixel_data {};
+			// void* pixel_data {};
 
 			GLuint framebuffer {};
 			GLuint framebuffer_renderbuffer_color {};
@@ -69,6 +71,7 @@ namespace XGK
 
 
 			virtual void endLoop (void) override;
+			virtual void destroy (void) override;
 		};
 
 
@@ -126,7 +129,7 @@ namespace XGK
 			static Material* used_instance;
 
 			static const GLenum TOPOLOGY [3];
-			static const GLenum FRONT_FACE [3];
+			static const GLenum FRONT_FACE [2];
 
 
 

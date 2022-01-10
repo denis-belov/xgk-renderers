@@ -20,6 +20,8 @@ namespace XGK
 
 
 
+			type = XGK::RENDERERS::RendererType::OPENGL;
+
 			wrapper = _wrapper;
 
 
@@ -58,6 +60,10 @@ namespace XGK
 		void Renderer::endLoop (void)
 		{
 			glfwSwapBuffers(window);
+		}
+
+		void Renderer::destroy (void)
+		{
 		}
 
 
@@ -135,6 +141,10 @@ namespace XGK
 			// glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			// glDrawBuffer(GL_BACK);
 			// glReadBuffer(GL_FRONT);
+		}
+
+		void RendererOffscreen::destroy (void)
+		{
 		}
 
 

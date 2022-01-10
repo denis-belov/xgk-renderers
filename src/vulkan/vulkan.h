@@ -21,6 +21,7 @@
 
 #include "xgk-renderers/src/glfw/glfw-3.3.5/include/GLFW/glfw3.h"
 #include "xgk-renderers/src/glfw/glfw-3.3.5/include/GLFW/glfw3native.h"
+#include "xgk-renderers/src/base/renderer.h"
 
 #define VK_NO_PROTOTYPES
 #include "vulkan/vulkan.h"
@@ -29,7 +30,7 @@
 
 // #include "xgk-vulkan/src/wrappers.h"
 
-#include "xgk-api/src/renderer/renderer.h"
+// #include "xgk-api/src/renderer/renderer.h"
 #include "xgk-api/src/uniform/uniform.h"
 #include "xgk-api/src/uniform-block/uniform-block.h"
 #include "xgk-api/src/descriptor-set/descriptor-set.h"
@@ -2132,9 +2133,9 @@ namespace XGK
 {
 	namespace VULKAN
 	{
-		struct RendererBase
+		struct RendererBase : public XGK::RENDERERS::Renderer
 		{
-			API::Renderer* wrapper {};
+			// API::Renderer* wrapper {};
 
 			GLFWwindow* window {};
 
@@ -2179,8 +2180,8 @@ namespace XGK
 
 
 
-			virtual void endLoop (void) = 0;
-			virtual void destroy (void) = 0;
+			// virtual void endLoop (void) = 0;
+			// virtual void destroy (void) = 0;
 		};
 
 
@@ -2222,7 +2223,7 @@ namespace XGK
 
 			std::vector<VkImage> render_images {};
 			VkBuffer pixel_buffer { VK_NULL_HANDLE };
-			void* pixel_data {};
+			// void* pixel_data {};
 
 
 
